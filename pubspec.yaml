@@ -1,6 +1,6 @@
 name: vults
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
 
 environment:
@@ -9,6 +9,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  firebase_core: ^3.12.1
+  firebase_auth: ^5.5.1
+  cloud_firestore: ^5.6.5
+  intl: ^0.20.2
+  flutter_bloc: ^8.1.0
+  equatable: ^2.0.5
+  bloc: ^8.1.0
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +24,12 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/icons/vultsicon.png
+  fonts:
+    - family: "Fredoka"
+      fonts:
+        - asset: assets/fonts/Fredoka-VariableFont_wdth,wght.ttf
+    - family: "FredokaOne"
+      fonts:
+        - asset: assets/fonts/FredokaOne-Regular.ttf
