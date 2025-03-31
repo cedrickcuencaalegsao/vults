@@ -2,35 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:vults/core/constants/constant_string.dart';
 
 class LandingScreen extends StatelessWidget {
-  const LandingScreen({Key? key}) : super(key: key);
+  const LandingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-<<<<<<< HEAD
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('Landing Screen'),
-            Column(
-              children: <Widget>[
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/login');
-                  },
-                  child: Text("Login"),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/register');
-                  },
-                  child: Text("Register"),
-                ),
-              ],
-            ),
-          ],
-=======
+
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -145,7 +121,6 @@ class LandingScreen extends StatelessWidget {
               ],
             ),
           ),
->>>>>>> development
         ),
       ),
     );
