@@ -10,6 +10,31 @@ class LandingScreen extends StatefulWidget {
 class LandingScreenState extends State<LandingScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text('Landing Screen'),
+            Column(
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/login');
+                  },
+                  child: Text("Login"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/register');
+                  },
+                  child: Text("Register"),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
