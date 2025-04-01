@@ -12,6 +12,8 @@ import './views/screens/mobile/transaction_screen.dart' as mobile;
 import './views/screens/mobile/settings_screen.dart' as mobile;
 // Web Views.
 import './views/screens/web/splash_screen.dart' as web;
+import './views/screens/web/landing_screen.dart' as web;
+import './views/screens/web/login_screen.dart' as web;
 
 // Firebase.
 import 'package:firebase_core/firebase_core.dart';
@@ -31,7 +33,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       title: ConstantString.appName,
       debugShowCheckedModeBanner: false,
-      home: kIsWeb ? const web.SplashScreen() : const mobile.SplashScreen(),
+      // home: kIsWeb ? const web.SplashScreen() : const mobile.SplashScreen(),
       routes: kIsWeb ? WebRoutes.getRoutes() : MobileRoutes.getRoutes(),
     );
   }
@@ -40,6 +42,7 @@ class MainApp extends StatelessWidget {
 class MobileRoutes {
   static Map<String, WidgetBuilder> getRoutes() {
     return <String, WidgetBuilder>{
+      '/': (BuildContext context) => const mobile.SplashScreen(),
       '/landing': (BuildContext context) => const mobile.LandingScreen(),
       '/login': (BuildContext context) => const mobile.LoginScreen(),
       '/register': (BuildContext context) => const mobile.RegisterFirstScreen(),
@@ -57,6 +60,8 @@ class WebRoutes {
   static Map<String, WidgetBuilder> getRoutes() {
     return <String, WidgetBuilder>{
       '/': (BuildContext context) => const web.SplashScreen(),
+      '/landing': (BuildContext context) => const web.LandingScreen(),
+      '/login': (BuildContext context) => const web.LoginScreen(),
     };
   }
 }
