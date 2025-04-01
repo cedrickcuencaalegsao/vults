@@ -7,6 +7,32 @@ class ConstantString {
 
   // App name
   static const String appName = 'Vults';
+  static const String settings = 'Settings';
+  static const String sendMoney = 'Send Money';
+  static const String transaction = 'Transaction';
+  static const String dashboard = 'Dashboard';
+  static const String login = 'Login';
+  static const String register = 'Register New Account';
+  static const String landing = 'Landing Page';
+  static const String readPolicy = 'I have read the terms and policy.';
+  static const String agreePolicy = 'I agree to the terms and policy.';
+
+  // User Profile.
+  static const String userProfile = 'User Profile';
+  static const String fistname = 'First Name';
+  static const String middlename = 'Middle Name';
+  static const String lastname = 'Last Name';
+  static const String email = 'Email';
+  static const String confirmEmail = 'Confirm Email';
+  static const String birthday = 'Birthday';
+  static const String pin = 'Pin';
+  static const String confirmPin = 'Confirm Pin';
+
+  // Actions.
+  static const String loginAction = 'Login';
+  static const String registerAction = 'Register';
+  static const String next = 'Next';
+  static const String continueTxt = 'Continue';
 
   // colors name.
   static const Color darkBlue = Color(0xFF0B003D);
