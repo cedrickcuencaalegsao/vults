@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:vults/core/constants/constant_string.dart';
+import 'package:vults/views/widgets/mobile/buttons.dart';
 
 class LandingScreen extends StatelessWidget {
   const LandingScreen({super.key});
 
+  void _login(BuildContext context) {
+    Navigator.pushNamed(context, '/login');
+  }
+  void _register(BuildContext context) {
+    Navigator.pushNamed(context, '/register');
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
 
-    final size = MediaQuery.of(context).size;
+    // final size = MediaQuery.of(context).size;
 
     return Scaffold(
       body: Container(
@@ -26,7 +37,7 @@ class LandingScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: size.height * 0.20),
+                SizedBox(height: screenHeight * 0.20),
                 // Title
                 RichText(
                   text: TextSpan(
@@ -65,59 +76,35 @@ class LandingScreen extends StatelessWidget {
                 Center(
                   child: Column(
                     children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/login');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ConstantString.lightBlue,
-                          foregroundColor: ConstantString.white,
-                          minimumSize: const Size(double.infinity, 70),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: const Text(
-                          "Login",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: ConstantString.fontFredokaOne,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      OutlinedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/register');
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: ConstantString.darkBlue,
-                          side: BorderSide(
-                            color: ConstantString.white,
-                            width: 2,
-                          ),
-                          minimumSize: const Size(double.infinity, 70),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                          backgroundColor: ConstantString.white,
-                        ),
-                        child: const Text(
-                          "Register",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: ConstantString.fontFredokaOne,
-                            color: ConstantString.darkBlue,
-                          ),
-                        ),
-                      ),
+                      CustomButton(
+                        text: ConstantString.login,
+                        color: ConstantString.lightBlue,
+                        textColor: ConstantString.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: ConstantString.fontFredokaOne,
+                        width: screenWidth * 0.85,
+                        height: screenHeight * 0.07,
+                        borderRadius: 30,
+                        onPressed: ()=>_login(context),  
+                      ), 
+                       SizedBox(height: screenHeight * 0.02),
+                      CustomButton(
+                        text: ConstantString.register,
+                        color: ConstantString.white,
+                        textColor: ConstantString.darkBlue,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: ConstantString.fontFredokaOne,
+                        width: screenWidth * 0.85,
+                        height: screenHeight * 0.07,
+                        borderRadius: 30,
+                        onPressed: ()=>_register(context),  
+                      ), 
                     ],
                   ),
                 ),
-                SizedBox(height: size.height * 0.05),
+                SizedBox(height: screenHeight * 0.07),
               ],
             ),
           ),
