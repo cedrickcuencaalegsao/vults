@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
-import './core/constants/constant_string.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:vults/core/constants/constant_string.dart';
 // Mobile Views.
-import './views/screens/mobile/splash_screen.dart' as mobile;
-import './views/screens/mobile/landing_screen.dart' as mobile;
-import './views/screens/mobile/login_screen.dart' as mobile;
-import './views/screens/mobile/register_screen.dart' as mobile;
-import './views/screens/mobile/dashboard_screen.dart' as mobile;
-import './views/screens/mobile/sendmoney_screen.dart' as mobile;
-import './views/screens/mobile/transaction_screen.dart' as mobile;
-import './views/screens/mobile/settings_screen.dart' as mobile;
+import 'package:vults/views/screens/mobile/register_screen.dart' as mobile;
+import 'package:vults/views/screens/mobile/sendmoney_screen.dart' as mobile;
+import 'package:vults/views/screens/mobile/transaction_screen.dart' as mobile;
+import 'package:vults/views/screens/mobile/settings_screen.dart' as mobile;
+import 'package:vults/views/screens/mobile/splash_screen.dart' as mobile;
+import 'package:vults/views/screens/mobile/landing_screen.dart' as mobile;
+import 'package:vults/views/screens/mobile/login_screen.dart' as mobile;
+import 'package:vults/views/screens/mobile/dashboard_screen.dart' as mobile;
+import 'package:vults/views/screens/mobile/scan_screen.dart' as mobile;
+import 'package:vults/views/screens/mobile/notification_screen.dart' as mobile;
+
 // Web Views.
-import './views/screens/web/splash_screen.dart' as web;
-import './views/screens/web/landing_screen.dart' as web;
-import './views/screens/web/login_screen.dart' as web;
+import 'package:vults/views/screens/web/splash_screen.dart' as web;
+import 'package:vults/views/screens/web/landing_screen.dart' as web;
+import 'package:vults/views/screens/web/login_screen.dart' as web;
 
 // Firebase.
 import 'package:firebase_core/firebase_core.dart';
@@ -49,8 +52,11 @@ class MobileRoutes {
       '/dashboard': (BuildContext context) => const mobile.DashboardScreen(),
       '/sendmoney':
           (BuildContext context) => const mobile.SendmoneyFirstScreen(),
+      '/scanqr': (BuildContext context) => const mobile.ScanScreen(),
       '/transaction':
           (BuildContext context) => const mobile.TransactionScreen(),
+      '/notification':
+          (BuildContext context) => const mobile.NotificationScreen(),
       '/settings': (BuildContext context) => const mobile.SettingsScreen(),
     };
   }

@@ -34,6 +34,12 @@ class ConstantString {
   static const String next = 'Next';
   static const String continueTxt = 'Continue';
 
+  // Drawer Menu.
+  static const String dashboardMenu = 'Dashboard';
+  static const String transactionMenu = 'Transaction';
+  static const String sendMoneyMenu = 'Send Money';
+  static const String settingsMenu = 'Settings';
+
   // colors name.
   static const Color darkBlue = Color(0xFF0B003D);
   static const Color lightBlue = Color(0xFF2F00FF);
