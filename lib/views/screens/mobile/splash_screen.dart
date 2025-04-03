@@ -35,8 +35,8 @@ class SplashScreenState extends State<SplashScreen> {
           children:  <Widget>[
             Image(
               image: AssetImage('assets/icons/vultsicon.png'),
-              width: screenHeight * 0.2,
-              height: screenWidth * 0.2,
+              width: screenHeight * 0.5,
+              height: screenWidth * 0.5,
             ),
             Text(
               ConstantString.appName,
