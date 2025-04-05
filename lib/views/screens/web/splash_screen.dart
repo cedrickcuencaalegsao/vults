@@ -7,12 +7,17 @@ class SplashScreen extends StatefulWidget {
   SplashScreenState createState() => SplashScreenState();
 }
 
-class SplashScreenState extends State<SplashScreen>{
+class SplashScreenState extends State<SplashScreen> {
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Text('Splash Screen WEB.'),
+        // child: Text('Splash Screen WEB.'),
+
+        // for testing CORS issue
+        child: Image.network(
+          'https://firebasestorage.googleapis.com/v0/b/volts-app-70252.firebasestorage.app/o/test%2Ftest.jpg?alt=media&token=2dd28365-6d3a-4100-b6e7-de03edcb71af',
+        ),
       ),
     );
   }
