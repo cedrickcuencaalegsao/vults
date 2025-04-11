@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vults/core/constants/constant_string.dart';
-import 'package:vults/views/widgets/mobile/app_bar.dart';
+// import 'package:vults/views/widgets/mobile/app_bar.dart';
 
 class NotificationScreen extends StatelessWidget {
   const NotificationScreen({Key? key}) : super(key: key);
@@ -9,14 +9,14 @@ class NotificationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: CustomAppBar(
-        title: "Notifications",
-        iconColor: ConstantString.darkBlue,
-        fontColor: ConstantString.darkBlue,
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-        fontFamily: ConstantString.fontFredokaOne,
-      ),
+      // appBar: CustomAppBar(
+      //   title: "Notifications",
+      //   iconColor: ConstantString.darkBlue,
+      //   fontColor: ConstantString.darkBlue,
+      //   fontSize: 24,
+      //   fontWeight: FontWeight.bold,
+      //   fontFamily: ConstantString.fontFredokaOne,
+      // ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
