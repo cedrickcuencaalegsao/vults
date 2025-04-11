@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:vults/core/constants/constant_string.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  LoginScreenState createState() => LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class LoginScreenState extends State<LoginScreen> {
   String enteredPin = '';
   final int maxPinLength = 8;
 
@@ -79,8 +79,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           shape: BoxShape.circle,
                           color:
                               index < enteredPin.length
-                                  ? Colors.white
-                                  : Colors.white.withOpacity(0.3),
+                                  ? ConstantString.white
+                                  : ConstantString.white.withAlpha(88),
                         ),
                       ),
                     );

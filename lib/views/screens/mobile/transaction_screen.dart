@@ -3,12 +3,12 @@ import 'package:vults/core/constants/constant_string.dart';
 import 'package:vults/views/widgets/mobile/transaction_modal.dart';
 
 class TransactionScreen extends StatefulWidget {
-  const TransactionScreen({Key? key}) : super(key: key);
+  const TransactionScreen({super.key});
   @override
-  _TransactionScreenState createState() => _TransactionScreenState();
+  TransactionScreenState createState() => TransactionScreenState();
 }
 
-class _TransactionScreenState extends State<TransactionScreen> {
+class TransactionScreenState extends State<TransactionScreen> {
   String sortOrder = 'Date Ascending';
   @override
   Widget build(BuildContext context) {

@@ -25,15 +25,18 @@ class SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const <Widget>[
+          children:  <Widget>[
             Image(
               image: AssetImage('assets/icons/vultsicon.png'),
-              width: 200,
-              height: 200,
+              width: screenHeight * 0.5,
+              height: screenWidth * 0.5,
             ),
             Text(
               ConstantString.appName,

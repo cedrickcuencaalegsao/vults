@@ -48,6 +48,47 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+class SettingsScreenState extends State<SettingsScreen> {
+  Widget _buildSettingItem({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    VoidCallback? onTap,
+  }) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, color: iconColor),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: ConstantString.darkBlue,
+        ),
+      ),
+      trailing: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+          color: ConstantString.darkBlue,
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
