@@ -63,6 +63,10 @@ class DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  void navigate(String route){
+    Navigator.pushNamed(context, route);
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -132,7 +136,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                   color: ConstantString.darkBlue,
                 ),
               ),
-              onTap: () => Navigator.pop(context),
+              onTap: () => navigate("/dashboard"),
             ),
             SizedBox(height: screenWidth * 0.03),
             ListTile(
@@ -149,7 +153,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                   color: ConstantString.darkBlue,
                 ),
               ),
-              onTap: () => Navigator.pop(context),
+              onTap: () => navigate("/transaction"),
             ),
             SizedBox(height: screenWidth * 0.03),
             ListTile(
@@ -166,7 +170,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                   color: ConstantString.darkBlue,
                 ),
               ),
-              onTap: () => Navigator.pop(context),
+              onTap: () => navigate("/settings"),
             ),
           ],
         ),
