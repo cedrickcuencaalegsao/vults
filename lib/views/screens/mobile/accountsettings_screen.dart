@@ -4,7 +4,7 @@ import 'dart:ui';
 import 'package:vults/views/widgets/mobile/app_bar.dart';
 
 class AccountSettingsScreen extends StatefulWidget {
-  const AccountSettingsScreen({Key? key}) : super(key: key);
+  const AccountSettingsScreen({super.key});
 
   @override
   State<AccountSettingsScreen> createState() => _AccountSettingsScreenState();

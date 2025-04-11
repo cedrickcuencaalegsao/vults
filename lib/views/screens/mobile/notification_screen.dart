@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:vults/core/constants/constant_string.dart';
 import 'package:vults/views/widgets/mobile/app_bar.dart';
 
-class NotificationScreen extends StatelessWidget {
-  const NotificationScreen({Key? key}) : super(key: key);
+class NotificationScreen extends StatefulWidget {
+  const NotificationScreen({super.key});
 
+  @override
+  NotificationScreenState createState() => NotificationScreenState();
+  
+}
+
+class NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
