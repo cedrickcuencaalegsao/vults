@@ -5,12 +5,48 @@ import 'package:vults/views/screens/mobile/downloadpdf_screen.dart';
 import 'package:vults/views/screens/mobile/notificationsetting_screen.dart';
 import 'package:vults/views/widgets/mobile/app_bar.dart';
 
-class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({Key? key}) : super(key: key);
 
-  @override
-  SettingsScreenState createState() => SettingsScreenState();
-}
+  Widget _buildSettingItem({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    VoidCallback? onTap,
+  }) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, color: iconColor),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: ConstantString.darkBlue,
+        ),
+      ),
+      trailing: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+          color: ConstantString.darkBlue,
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
 
 class SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSettingItem({

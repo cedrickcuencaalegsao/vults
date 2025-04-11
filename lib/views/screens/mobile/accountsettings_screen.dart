@@ -6,6 +6,7 @@ import 'package:vults/views/widgets/mobile/app_bar.dart';
 class AccountSettingsScreen extends StatefulWidget {
   const AccountSettingsScreen({super.key});
 
+
   @override
   State<AccountSettingsScreen> createState() => _AccountSettingsScreenState();
 }
