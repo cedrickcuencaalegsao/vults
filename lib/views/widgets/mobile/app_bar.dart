@@ -23,7 +23,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
         child: AppBar(
           elevation: 0,
           backgroundColor: Color.fromRGBO(255, 255, 255, 0.1),
@@ -62,4 +62,5 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
+
 // >>>>>>> 53947413571e0220dde6e09d4754c363c32abe37

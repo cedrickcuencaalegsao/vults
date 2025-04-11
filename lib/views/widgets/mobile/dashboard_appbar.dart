@@ -23,16 +23,11 @@ class DashboardAppBarState extends State<DashboardAppBar> {
       backgroundColor: Colors.transparent,
       elevation: 0,
       flexibleSpace: ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: 5.0,
-          sigmaY: 5.0,
-        ),
-        child: Container(
-          color: Color.fromRGBO(255, 255, 255, 0.1),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
+          child: Container(color: Color.fromRGBO(255, 255, 255, 0.1)),
         ),
       ),
-    ),
       leading: IconButton(
         padding: const EdgeInsets.only(left: 20),
         icon: const Icon(
