@@ -3,13 +3,13 @@ import 'package:vults/core/constants/constant_string.dart';
 import 'package:vults/views/widgets/mobile/app_bar.dart';
 
 class DownloadPdfScreen extends StatefulWidget {
-  const DownloadPdfScreen({Key? key}) : super(key: key);
+  const DownloadPdfScreen({super.key});
 
   @override
-  _DownloadPdfScreenState createState() => _DownloadPdfScreenState();
+  DownloadPdfScreenState createState() => DownloadPdfScreenState();
 }
 
-class _DownloadPdfScreenState extends State<DownloadPdfScreen> {
+class DownloadPdfScreenState extends State<DownloadPdfScreen> {
   String? _selectedOption;
 
   @override

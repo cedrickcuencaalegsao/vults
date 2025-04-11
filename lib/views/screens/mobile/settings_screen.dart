@@ -5,9 +5,14 @@ import 'package:vults/views/screens/mobile/downloadpdf_screen.dart';
 import 'package:vults/views/screens/mobile/notificationsetting_screen.dart';
 import 'package:vults/views/widgets/mobile/app_bar.dart';
 
-class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
 
+  @override
+  SettingsScreenState createState() => SettingsScreenState();
+}
+
+class SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSettingItem({
     required IconData icon,
     required Color iconColor,
