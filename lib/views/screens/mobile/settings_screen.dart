@@ -121,13 +121,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
                 onTap: () {
-                  // Navigate to account settings
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AccountSettingsScreen(),
-                    ),
-                  );
+                  Navigator.pushNamed(context, '/accountsettings');
                 },
               ),
               const SizedBox(height: 24),
@@ -148,13 +142,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                 iconColor: ConstantString.red,
                 title: "Notification",
                 onTap: () {
-                  // Navigate to notification settings
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const NotificationSettingScreen(),
-                    ),
-                  );
+                  Navigator.pushNamed(context, '/notificationsetting');
                 },
               ),
               _buildSettingItem(
@@ -176,8 +164,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                 iconColor: ConstantString.lightBlue,
                 title: "Devices",
                 onTap: () {
-                  // Devices settings
-                  // Add navigation to Devices screen when available
+                  Navigator.pushNamed(context, '/devices');
                 },
               ),
               const Spacer(),
