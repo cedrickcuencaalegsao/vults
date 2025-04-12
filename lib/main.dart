@@ -12,6 +12,12 @@ import 'package:vults/views/screens/mobile/login_screen.dart' as mobile;
 import 'package:vults/views/screens/mobile/dashboard_screen.dart' as mobile;
 import 'package:vults/views/screens/mobile/scan_screen.dart' as mobile;
 import 'package:vults/views/screens/mobile/notification_screen.dart' as mobile;
+import 'package:vults/views/screens/mobile/devices_screen.dart' as mobile;
+import 'package:vults/views/screens/mobile/downloadpdf_screen.dart' as mobile;
+import 'package:vults/views/screens/mobile/notificationsetting_screen.dart'
+    as mobile;
+import 'package:vults/views/screens/mobile/accountsettings_screen.dart'
+    as mobile;
 
 // Web Views.
 import 'package:vults/views/screens/web/splash_screen.dart' as web;
@@ -36,7 +42,6 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       title: ConstantString.appName,
       debugShowCheckedModeBanner: false,
-      // home: kIsWeb ? const web.SplashScreen() : const mobile.SplashScreen(),
       routes: kIsWeb ? WebRoutes.getRoutes() : MobileRoutes.getRoutes(),
     );
   }
@@ -58,6 +63,14 @@ class MobileRoutes {
       '/notification':
           (BuildContext context) => const mobile.NotificationScreen(),
       '/settings': (BuildContext context) => const mobile.SettingsScreen(),
+      '/downloadpdf':
+          (BuildContext context) => const mobile.DownloadPdfScreen(),
+      '/accountsettings':
+          (BuildContext context) => const mobile.AccountSettingsScreen(),
+
+      '/devices': (BuildContext context) => const mobile.DevicesScreen(),
+      '/notificationsetting':
+          (BuildContext context) => const mobile.NotificationSettingScreen(),
     };
   }
 }

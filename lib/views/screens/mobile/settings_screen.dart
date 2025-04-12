@@ -1,52 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:vults/core/constants/constant_string.dart';
-import 'package:vults/views/screens/mobile/accountsettings_screen.dart';
 import 'package:vults/views/screens/mobile/downloadpdf_screen.dart';
-import 'package:vults/views/screens/mobile/notificationsetting_screen.dart';
 import 'package:vults/views/widgets/mobile/app_bar.dart';
 
-class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
 
-  Widget _buildSettingItem({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    VoidCallback? onTap,
-  }) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(icon, color: iconColor),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: ConstantString.darkBlue,
-        ),
-      ),
-      trailing: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Icon(
-          Icons.arrow_forward_ios,
-          size: 16,
-          color: ConstantString.darkBlue,
-        ),
-      ),
-      onTap: onTap,
-    );
-  }
+  @override
+  SettingsScreenState createState() => SettingsScreenState(); 
+}
 
 class SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSettingItem({
@@ -157,13 +119,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
                 onTap: () {
-                  // Navigate to account settings
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AccountSettingsScreen(),
-                    ),
-                  );
+                  Navigator.pushNamed(context, '/accountsettings');
                 },
               ),
               const SizedBox(height: 24),
@@ -184,13 +140,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                 iconColor: ConstantString.red,
                 title: "Notification",
                 onTap: () {
-                  // Navigate to notification settings
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const NotificationSettingScreen(),
-                    ),
-                  );
+                  Navigator.pushNamed(context, '/notificationsetting');
                 },
               ),
               _buildSettingItem(
@@ -212,8 +162,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                 iconColor: ConstantString.lightBlue,
                 title: "Devices",
                 onTap: () {
-                  // Devices settings
-                  // Add navigation to Devices screen when available
+                  Navigator.pushNamed(context, '/devices');
                 },
               ),
               const Spacer(),

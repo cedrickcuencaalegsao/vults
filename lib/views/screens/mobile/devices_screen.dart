@@ -3,13 +3,13 @@ import 'package:vults/core/constants/constant_string.dart';
 import 'package:vults/views/widgets/mobile/app_bar.dart';
 
 class DevicesScreen extends StatefulWidget {
-  const DevicesScreen({Key? key}) : super(key: key);
+  const DevicesScreen({super.key});
 
   @override
-  _DevicesScreenState createState() => _DevicesScreenState();
+  DevicesScreenState createState() => DevicesScreenState();
 }
 
-class _DevicesScreenState extends State<DevicesScreen> {
+class DevicesScreenState extends State<DevicesScreen> {
   // Sample mobile device data
   final List<Map<String, dynamic>> devices = [
     {
