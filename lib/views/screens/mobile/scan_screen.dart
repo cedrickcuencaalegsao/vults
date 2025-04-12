@@ -111,44 +111,42 @@ class ScanScreenState extends State<ScanScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Scan Result'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              scannedData ?? 'No data found',
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 16),
-            if (lastScannedBarcode?.format != null)
-              Text(
-                'Format: ${lastScannedBarcode!.format.name}',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Scan Result'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  scannedData ?? 'No data found',
+                  style: const TextStyle(fontSize: 16),
                 ),
+                const SizedBox(height: 16),
+                if (lastScannedBarcode?.format != null)
+                  Text(
+                    'Format: ${lastScannedBarcode!.format.name}',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                  ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _resetScanner();
+                },
+                child: const Text('Scan Again'),
               ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _resetScanner();
-            },
-            child: const Text('Scan Again'),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  closeScreen();
+                },
+                child: const Text('Close'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              closeScreen();
-            },
-            child: const Text('Close'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -229,19 +227,9 @@ class ScanScreenState extends State<ScanScreen> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(
-          icon: icon,
-          onPressed: onTap,
-          splashRadius: 24,
-        ),
+        IconButton(icon: icon, onPressed: onTap, splashRadius: 24),
         const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-          ),
-        ),
+        Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
       ],
     );
   }
@@ -251,39 +239,52 @@ class ScannerOverlay extends CustomPainter {
   final Rect scanArea;
   final Barcode? scannedBarcode;
 
-  ScannerOverlay({
-    required this.scanArea,
-    this.scannedBarcode,
-  });
+  ScannerOverlay({required this.scanArea, this.scannedBarcode});
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Draw background dimming
-    final backgroundPaint = Paint()..color = Colors.black54;
+    // Draw semi-transparent overlay around scan area
+    final backgroundPaint = Paint()..color = Colors.black.withOpacity(0.3);
+
+    // Draw top rectangle
     canvas.drawRect(
-      Rect.fromLTRB(0, 0, size.width, size.height),
+      Rect.fromLTRB(0, 0, size.width, scanArea.top),
       backgroundPaint,
     );
 
-    // Clear the scan area
-    final clearPaint = Paint()
-      ..color = Colors.transparent
-      ..blendMode = BlendMode.clear;
-    canvas.drawRect(scanArea, clearPaint);
+    // Draw bottom rectangle
+    canvas.drawRect(
+      Rect.fromLTRB(0, scanArea.bottom, size.width, size.height),
+      backgroundPaint,
+    );
+
+    // Draw left rectangle
+    canvas.drawRect(
+      Rect.fromLTRB(0, scanArea.top, scanArea.left, scanArea.bottom),
+      backgroundPaint,
+    );
+
+    // Draw right rectangle
+    canvas.drawRect(
+      Rect.fromLTRB(scanArea.right, scanArea.top, size.width, scanArea.bottom),
+      backgroundPaint,
+    );
 
     // Draw scan area border
-    final borderPaint = Paint()
-      ..color = scannedBarcode != null ? Colors.green : Colors.white
-      ..strokeWidth = 2.0
-      ..style = PaintingStyle.stroke;
+    final borderPaint =
+        Paint()
+          ..color = scannedBarcode != null ? Colors.green : Colors.white
+          ..strokeWidth = 2.0
+          ..style = PaintingStyle.stroke;
     canvas.drawRect(scanArea, borderPaint);
 
     // Draw animated corners
-    final cornerPaint = Paint()
-      ..color = scannedBarcode != null ? Colors.green : Colors.blueAccent
-      ..strokeWidth = 4.0
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+    final cornerPaint =
+        Paint()
+          ..color = scannedBarcode != null ? Colors.green : Colors.blueAccent
+          ..strokeWidth = 4.0
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
 
     final cornerLength = 24.0;
     final cornerRadius = 8.0;
@@ -338,17 +339,21 @@ class ScannerOverlay extends CustomPainter {
 
     // If we have a scanned barcode, draw its corners
     if (scannedBarcode?.corners != null) {
-      final barcodePaint = Paint()
-        ..color = Colors.green.withOpacity(0.8)
-        ..strokeWidth = 3.0
-        ..style = PaintingStyle.stroke;
+      final barcodePaint =
+          Paint()
+            ..color = Colors.green.withOpacity(0.8)
+            ..strokeWidth = 3.0
+            ..style = PaintingStyle.stroke;
 
       final corners = scannedBarcode!.corners!;
       for (int i = 0; i < corners.length; i++) {
         final nextIndex = (i + 1) % corners.length;
         canvas.drawLine(
           Offset(corners[i].dx.toDouble(), corners[i].dy.toDouble()),
-          Offset(corners[nextIndex].dx.toDouble(), corners[nextIndex].dy.toDouble()),
+          Offset(
+            corners[nextIndex].dx.toDouble(),
+            corners[nextIndex].dy.toDouble(),
+          ),
           barcodePaint,
         );
       }

@@ -14,8 +14,10 @@ import 'package:vults/views/screens/mobile/scan_screen.dart' as mobile;
 import 'package:vults/views/screens/mobile/notification_screen.dart' as mobile;
 import 'package:vults/views/screens/mobile/devices_screen.dart' as mobile;
 import 'package:vults/views/screens/mobile/downloadpdf_screen.dart' as mobile;
-import 'package:vults/views/screens/mobile/notificationsetting_screen.dart' as mobile;
-import 'package:vults/views/screens/mobile/accountsettings_screen.dart' as mobile;
+import 'package:vults/views/screens/mobile/notificationsetting_screen.dart'
+    as mobile;
+import 'package:vults/views/screens/mobile/accountsettings_screen.dart'
+    as mobile;
 
 // Web Views.
 import 'package:vults/views/screens/web/splash_screen.dart' as web;
