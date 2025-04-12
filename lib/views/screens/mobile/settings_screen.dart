@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vults/core/constants/constant_string.dart';
-import 'package:vults/views/screens/mobile/accountsettings_screen.dart';
 import 'package:vults/views/screens/mobile/downloadpdf_screen.dart';
-import 'package:vults/views/screens/mobile/notificationsetting_screen.dart';
 import 'package:vults/views/widgets/mobile/app_bar.dart';
 
 class SettingsScreen extends StatefulWidget {
