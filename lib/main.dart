@@ -21,6 +21,7 @@ import 'package:vults/views/screens/mobile/accountsettings_screen.dart' as mobil
 import 'package:vults/views/screens/web/splash_screen.dart' as web;
 import 'package:vults/views/screens/web/landing_screen.dart' as web;
 import 'package:vults/views/screens/web/login_screen.dart' as web;
+import 'package:vults/views/screens/web/admin_dashboard.dart' as web;
 
 // Firebase.
 import 'package:firebase_core/firebase_core.dart';
@@ -79,6 +80,7 @@ class WebRoutes {
       '/': (BuildContext context) => const web.SplashScreen(),
       '/landing': (BuildContext context) => const web.LandingScreen(),
       '/login': (BuildContext context) => const web.LoginScreen(),
+      '/dashboard': (BuildContext context) => const web.AdminDashboard(),
     };
   }
 }

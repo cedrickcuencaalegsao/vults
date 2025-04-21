@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
+// import 'dart:ui';
 import 'package:vults/core/constants/constant_string.dart';
 
 class GuestAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -56,7 +56,7 @@ class GuestAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   Widget _buildMenuItem(BuildContext context, String title, int index) {
     final bool isActive = index == activeIndex;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: MouseRegion(
@@ -78,7 +78,8 @@ class GuestAppBar extends StatelessWidget implements PreferredSizeWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                  color: isActive ? Colors.white : Colors.white.withOpacity(0.9),
+                  color:
+                      isActive ? Colors.white : Colors.white.withOpacity(0.9),
                 ),
               ),
               const SizedBox(height: 5),
@@ -113,10 +114,7 @@ class GuestAppBar extends StatelessWidget implements PreferredSizeWidget {
           decoration: BoxDecoration(
             color: bgColor,
             borderRadius: BorderRadius.circular(30),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.5),
-              width: 1,
-            ),
+            border: Border.all(color: Colors.white.withOpacity(0.5), width: 1),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.1),
@@ -127,10 +125,7 @@ class GuestAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           child: Text(
             text,
-            style: TextStyle(
-              color: textColor,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -139,7 +134,8 @@ class GuestAppBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 // Responsive version for different screen sizes
-class ResponsiveGuestAppBar extends StatelessWidget implements PreferredSizeWidget {
+class ResponsiveGuestAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
   final String title;
   final List<String> menuItems;
   final Function(int)? onMenuItemTap;
@@ -147,13 +143,13 @@ class ResponsiveGuestAppBar extends StatelessWidget implements PreferredSizeWidg
   final int activeIndex;
 
   const ResponsiveGuestAppBar({
-    Key? key,
+    super.key,
     this.title = 'Vults',
     this.menuItems = const ['Home', 'Features', 'About', 'Contact'],
     this.onMenuItemTap,
     this.onLoginTap,
     this.activeIndex = 0,
-  }) : super(key: key);
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(70);
@@ -161,7 +157,7 @@ class ResponsiveGuestAppBar extends StatelessWidget implements PreferredSizeWidg
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    
+
     if (width > 1000) {
       return GuestAppBar(
         title: title,
@@ -171,7 +167,7 @@ class ResponsiveGuestAppBar extends StatelessWidget implements PreferredSizeWidg
         activeIndex: activeIndex,
       );
     } else {
-      return _MobileGuestAppBar(
+      return MobileGuestAppBar(
         title: title,
         menuItems: menuItems,
         onMenuItemTap: onMenuItemTap,
@@ -182,21 +178,22 @@ class ResponsiveGuestAppBar extends StatelessWidget implements PreferredSizeWidg
   }
 }
 
-class _MobileGuestAppBar extends StatelessWidget implements PreferredSizeWidget {
+class MobileGuestAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
   final String title;
   final List<String> menuItems;
   final Function(int)? onMenuItemTap;
   final VoidCallback? onLoginTap;
   final int activeIndex;
 
-  const _MobileGuestAppBar({
-    Key? key,
+  const MobileGuestAppBar({
+    super.key,
     required this.title,
     required this.menuItems,
     this.onMenuItemTap,
     this.onLoginTap,
     this.activeIndex = 0,
-  }) : super(key: key);
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(70);
@@ -240,12 +237,12 @@ class GuestAppBarDrawer extends StatelessWidget {
   final int activeIndex;
 
   const GuestAppBarDrawer({
-    Key? key,
+    super.key,
     required this.menuItems,
     this.onMenuItemTap,
     this.onLoginTap,
     this.activeIndex = 0,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -276,7 +273,7 @@ class GuestAppBarDrawer extends StatelessWidget {
                 ConstantString.orange,
                 ConstantString.white,
                 () {
-                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/login');
                   if (onLoginTap != null) onLoginTap!();
                 },
               ),
@@ -289,7 +286,7 @@ class GuestAppBarDrawer extends StatelessWidget {
 
   Widget _buildMenuItem(BuildContext context, String title, int index) {
     final bool isActive = index == activeIndex;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0),
       child: InkWell(
@@ -340,10 +337,7 @@ class GuestAppBarDrawer extends StatelessWidget {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(30),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.5),
-            width: 1,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.5), width: 1),
         ),
         child: Center(
           child: Text(
