@@ -286,7 +286,7 @@ class ScannerOverlay extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final cornerLength = 24.0;
-    final cornerRadius = 8.0;
+    // final cornerRadius = 8.0;
 
     // Top-left corner
     canvas.drawLine(
@@ -343,7 +343,7 @@ class ScannerOverlay extends CustomPainter {
         ..strokeWidth = 3.0
         ..style = PaintingStyle.stroke;
 
-      final corners = scannedBarcode!.corners!;
+      final corners = scannedBarcode!.corners;
       for (int i = 0; i < corners.length; i++) {
         final nextIndex = (i + 1) % corners.length;
         canvas.drawLine(
