@@ -21,7 +21,7 @@ class AppContainerState extends State<AppContainer> {
     {'icon': Icons.swap_horiz, 'title': 'Transactions'},
     {'icon': Icons.people, 'title': 'Users'},
     {'icon': Icons.bar_chart, 'title': 'Analytics'},
-    {'icon': Icons.settings, 'title': 'Settings'},
+    // Settings option removed as per user request
   ];
 
   void _onItemTapped(int index) {
@@ -36,36 +36,6 @@ class AppContainerState extends State<AppContainer> {
     final bool isMobile = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          ConstantString.appName,
-          style: const TextStyle(fontFamily: ConstantString.fontFredokaOne),
-        ),
-        backgroundColor: ConstantString.darkBlue,
-        elevation: 0,
-        actions: [
-          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-          IconButton(
-            icon: const Badge(child: Icon(Icons.notifications_outlined)),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 8),
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.white,
-              radius: 16,
-              child: Text(
-                'A',
-                style: TextStyle(
-                  color: ConstantString.darkBlue,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
       drawer: isMobile ? _buildDrawer() : null,
       body: Row(
         children: [
@@ -77,14 +47,6 @@ class AppContainerState extends State<AppContainer> {
         ],
       ),
       bottomNavigationBar: isMobile ? _buildBottomNavBar() : null,
-      floatingActionButton:
-          _shouldShowFAB()
-              ? FloatingActionButton(
-                onPressed: () {},
-                backgroundColor: ConstantString.lightBlue,
-                child: const Icon(Icons.add, color: Colors.white),
-              )
-              : null,
     );
   }
 
@@ -274,8 +236,6 @@ class AppContainerState extends State<AppContainer> {
         return const UsersView();
       case 3:
         return const Center(child: Text('Analytics View - Coming Soon'));
-      case 4:
-        return const Center(child: Text('Settings View - Coming Soon'));
       default:
         return const DashboardView();
     }

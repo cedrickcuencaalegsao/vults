@@ -237,7 +237,7 @@ class TransactionsView extends BaseView {
     );
   }
 
-  void _showTransactionOptions(BuildContext context) {
+  void showTransactionOptions(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder:

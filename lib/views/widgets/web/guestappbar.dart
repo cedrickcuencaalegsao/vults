@@ -178,8 +178,7 @@ class ResponsiveGuestAppBar extends StatelessWidget
   }
 }
 
-class MobileGuestAppBar extends StatelessWidget
-    implements PreferredSizeWidget {
+class MobileGuestAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<String> menuItems;
   final Function(int)? onMenuItemTap;

@@ -23,7 +23,7 @@ import 'package:vults/views/screens/mobile/accountsettings_screen.dart'
 import 'package:vults/views/screens/web/splash_screen.dart' as web;
 import 'package:vults/views/screens/web/landing_screen.dart' as web;
 import 'package:vults/views/screens/web/login_screen.dart' as web;
-import 'package:vults/views/screens/web/admin_dashboard.dart' as web;
+// import 'package:vults/views/screens/web/admin_dashboard.dart' as web;
 import 'package:vults/views/screens/web/app.dart' as web;
 
 // Firebase.
