@@ -23,24 +23,21 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleLogin() {
-    Navigator.pushNamed(context, '/dashboard');
+    Navigator.pushNamed(context, '/webApp');
     // if (_formKey.currentState!.validate()) {
     //   setState(() => _isLoading = true);
 
-    //   // TODO: Implement actual login logic here
-
-    //   // Simulate API call
     //   Future.delayed(const Duration(seconds: 2), () {
     //     setState(() => _isLoading = false);
-    //     // Navigate to home or show error
+
     //   });
     // }
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isSmallScreen = size.width < 600;
+    // final size = MediaQuery.of(context).size;
+    // final isSmallScreen = size.width < 600;
 
     return Scaffold(
       backgroundColor: ConstantString.lightGrey.withOpacity(0.1),
