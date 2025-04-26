@@ -1,0 +1,671 @@
+import 'package:flutter/material.dart';
+import 'package:vults/core/constants/constant_string.dart';
+import 'package:vults/views/screens/web/app.dart';
+
+// User Model
+class User {
+  final String id;
+  final String name;
+  final String email;
+  final String role;
+  String status;
+  bool isVerified;
+
+  User({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.role,
+    required this.status,
+    this.isVerified = false,
+  });
+
+  User copyWith({
+    String? id,
+    String? name,
+    String? email,
+    String? role,
+    String? status,
+    bool? isVerified,
+  }) {
+    return User(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      role: role ?? this.role,
+      status: status ?? this.status,
+      isVerified: isVerified ?? this.isVerified,
+    );
+  }
+}
+
+// Users View
+class UsersView extends BaseView {
+  const UsersView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return UserManagementContent(baseView: this);
+  }
+}
+
+class UserManagementContent extends StatefulWidget {
+  final UsersView baseView;
+
+  const UserManagementContent({super.key, required this.baseView});
+
+  @override
+  State<UserManagementContent> createState() => _UserManagementContentState();
+}
+
+class _UserManagementContentState extends State<UserManagementContent> {
+  final List<User> _users = [
+    User(
+      id: '001',
+      name: 'John Doe',
+      email: 'john@example.com',
+      role: 'Admin',
+      status: 'Active',
+      isVerified: true,
+    ),
+    User(
+      id: '002',
+      name: 'Jane Smith',
+      email: 'jane@example.com',
+      role: 'User',
+      status: 'Active',
+      isVerified: false,
+    ),
+    User(
+      id: '003',
+      name: 'Robert Johnson',
+      email: 'robert@example.com',
+      role: 'User',
+      status: 'Inactive',
+      isVerified: false,
+    ),
+    User(
+      id: '004',
+      name: 'Emily Davis',
+      email: 'emily@example.com',
+      role: 'User',
+      status: 'Active',
+      isVerified: true,
+    ),
+    User(
+      id: '005',
+      name: 'Michael Wilson',
+      email: 'michael@example.com',
+      role: 'User',
+      status: 'Pending',
+      isVerified: false,
+    ),
+  ];
+
+  List<User> _filteredUsers = [];
+  String _searchQuery = '';
+  String _statusFilter = 'All';
+  String _verificationFilter = 'All';
+
+  final List<String> _statusOptions = ['All', 'Active', 'Inactive', 'Pending'];
+  final List<String> _verificationOptions = ['All', 'Verified', 'Unverified'];
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredUsers = List.from(_users);
+  }
+
+  void _filterUsers() {
+    setState(() {
+      _filteredUsers =
+          _users.where((user) {
+            // Apply search filter
+            final matchesSearch =
+                user.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                user.email.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                user.id.toLowerCase().contains(_searchQuery.toLowerCase());
+
+            // Apply status filter
+            final matchesStatus =
+                _statusFilter == 'All' || user.status == _statusFilter;
+
+            // Apply verification filter
+            final matchesVerification =
+                _verificationFilter == 'All' ||
+                (_verificationFilter == 'Verified' && user.isVerified) ||
+                (_verificationFilter == 'Unverified' && !user.isVerified);
+
+            return matchesSearch && matchesStatus && matchesVerification;
+          }).toList();
+    });
+  }
+
+  void _editUser(User user) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => EditUserDialog(
+            user: user,
+            onSave: (updatedUser) {
+              setState(() {
+                final index = _users.indexWhere((u) => u.id == updatedUser.id);
+                if (index != -1) {
+                  _users[index] = updatedUser;
+                  _filterUsers();
+                }
+              });
+            },
+          ),
+    );
+  }
+
+  void _toggleVerification(User user) {
+    setState(() {
+      final index = _users.indexWhere((u) => u.id == user.id);
+      if (index != -1) {
+        _users[index] = user.copyWith(isVerified: !user.isVerified);
+        _filterUsers();
+      }
+    });
+  }
+
+  void _changeStatus(User user, String newStatus) {
+    setState(() {
+      final index = _users.indexWhere((u) => u.id == user.id);
+      if (index != -1) {
+        _users[index] = user.copyWith(status: newStatus);
+        _filterUsers();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isMobile = MediaQuery.of(context).size.width < 800;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          widget.baseView.buildSectionHeader('User Management'),
+          const SizedBox(height: 20),
+
+          // Search and filters
+          _buildSearchAndFilters(isMobile),
+          const SizedBox(height: 16),
+
+          // Users table
+          Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: BorderSide(color: Colors.grey.shade200),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: isMobile ? _buildMobileUserList() : _buildUsersDataTable(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchAndFilters(bool isMobile) {
+    return Wrap(
+      spacing: 16,
+      runSpacing: 16,
+      alignment: WrapAlignment.spaceBetween,
+      children: [
+        // Search field
+        SizedBox(
+          width: isMobile ? double.infinity : 300,
+          child: TextField(
+            decoration: InputDecoration(
+              hintText: 'Search users...',
+              prefixIcon: const Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 0),
+            ),
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+                _filterUsers();
+              });
+            },
+          ),
+        ),
+
+        // Status filter
+        SizedBox(
+          width: isMobile ? double.infinity : 200,
+          child: DropdownButtonFormField<String>(
+            value: _statusFilter,
+            decoration: InputDecoration(
+              labelText: 'Status',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            ),
+            items:
+                _statusOptions.map((status) {
+                  return DropdownMenuItem<String>(
+                    value: status,
+                    child: Text(status),
+                  );
+                }).toList(),
+            onChanged: (value) {
+              setState(() {
+                _statusFilter = value!;
+                _filterUsers();
+              });
+            },
+          ),
+        ),
+
+        // Verification filter
+        SizedBox(
+          width: isMobile ? double.infinity : 200,
+          child: DropdownButtonFormField<String>(
+            value: _verificationFilter,
+            decoration: InputDecoration(
+              labelText: 'Verification',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            ),
+            items:
+                _verificationOptions.map((option) {
+                  return DropdownMenuItem<String>(
+                    value: option,
+                    child: Text(option),
+                  );
+                }).toList(),
+            onChanged: (value) {
+              setState(() {
+                _verificationFilter = value!;
+                _filterUsers();
+              });
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUsersDataTable() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: DataTable(
+        columnSpacing: 20,
+        headingRowColor: MaterialStateProperty.all(Colors.grey.shade50),
+        columns: const [
+          DataColumn(label: Text('ID')),
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Email')),
+          DataColumn(label: Text('Role')),
+          DataColumn(label: Text('Status')),
+          DataColumn(label: Text('Verified')),
+          DataColumn(label: Text('Actions')),
+        ],
+        rows:
+            _filteredUsers.map((user) {
+              return DataRow(
+                cells: [
+                  DataCell(Text(user.id)),
+                  DataCell(Text(user.name)),
+                  DataCell(Text(user.email)),
+                  DataCell(Text(user.role)),
+                  DataCell(
+                    DropdownButton<String>(
+                      value: user.status,
+                      underline: Container(),
+                      icon: const Icon(Icons.arrow_drop_down, size: 16),
+                      items:
+                          ['Active', 'Inactive', 'Pending'].map((status) {
+                            return DropdownMenuItem<String>(
+                              value: status,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    status == 'Active'
+                                        ? Icons.check_circle
+                                        : status == 'Inactive'
+                                        ? Icons.cancel
+                                        : Icons.pending,
+                                    size: 16,
+                                    color:
+                                        status == 'Active'
+                                            ? Colors.green
+                                            : status == 'Inactive'
+                                            ? Colors.red
+                                            : Colors.orange,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(status),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                      onChanged: (newValue) {
+                        if (newValue != null) {
+                          _changeStatus(user, newValue);
+                        }
+                      },
+                    ),
+                  ),
+                  DataCell(
+                    Switch(
+                      value: user.isVerified,
+                      activeColor: ConstantString.lightBlue,
+                      onChanged: (value) {
+                        _toggleVerification(user);
+                      },
+                    ),
+                  ),
+                  DataCell(
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, size: 20),
+                          tooltip: 'Edit User',
+                          onPressed: () => _editUser(user),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildMobileUserList() {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: _filteredUsers.length,
+      separatorBuilder: (context, index) => const Divider(),
+      itemBuilder: (context, index) {
+        final user = _filteredUsers[index];
+        return ListTile(
+          title: Text(user.name),
+          subtitle: Text(user.email),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Switch(
+                value: user.isVerified,
+                activeColor: ConstantString.lightBlue,
+                onChanged: (value) {
+                  _toggleVerification(user);
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () => _editUser(user),
+              ),
+            ],
+          ),
+          onTap: () => _showUserDetailsBottomSheet(user),
+        );
+      },
+    );
+  }
+
+  void _showUserDetailsBottomSheet(User user) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                user.name,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              _detailRow('ID', user.id),
+              _detailRow('Email', user.email),
+              _detailRow('Role', user.role),
+              _detailRow('Status', user.status),
+              _detailRow('Verified', user.isVerified ? 'Yes' : 'No'),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.edit),
+                    label: const Text('Edit'),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _editUser(user);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ConstantString.lightBlue,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    icon: Icon(
+                      user.isVerified ? Icons.unpublished : Icons.verified_user,
+                    ),
+                    label: Text(user.isVerified ? 'Unverify' : 'Verify'),
+                    onPressed: () {
+                      _toggleVerification(user);
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          user.isVerified ? Colors.orange : Colors.green,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _detailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text(
+              '$label:',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class EditUserDialog extends StatefulWidget {
+  final User user;
+  final Function(User) onSave;
+
+  const EditUserDialog({super.key, required this.user, required this.onSave});
+
+  @override
+  State<EditUserDialog> createState() => _EditUserDialogState();
+}
+
+class _EditUserDialogState extends State<EditUserDialog> {
+  late TextEditingController _nameController;
+  late TextEditingController _emailController;
+  late String _role;
+  late String _status;
+  late bool _isVerified;
+
+  final List<String> _roles = ['Admin', 'User'];
+  final List<String> _statusOptions = ['Active', 'Inactive', 'Pending'];
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.user.name);
+    _emailController = TextEditingController(text: widget.user.email);
+    _role = widget.user.role;
+    _status = widget.user.status;
+    _isVerified = widget.user.isVerified;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Edit User'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Name',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _emailController,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _role,
+              decoration: const InputDecoration(
+                labelText: 'Role',
+                border: OutlineInputBorder(),
+              ),
+              items:
+                  _roles.map((role) {
+                    return DropdownMenuItem<String>(
+                      value: role,
+                      child: Text(role),
+                    );
+                  }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _role = value!;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _status,
+              decoration: const InputDecoration(
+                labelText: 'Status',
+                border: OutlineInputBorder(),
+              ),
+              items:
+                  _statusOptions.map((status) {
+                    return DropdownMenuItem<String>(
+                      value: status,
+                      child: Text(status),
+                    );
+                  }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _status = value!;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            SwitchListTile(
+              title: const Text('Verified'),
+              value: _isVerified,
+              onChanged: (value) {
+                setState(() {
+                  _isVerified = value;
+                });
+              },
+              contentPadding: EdgeInsets.zero,
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            final updatedUser = widget.user.copyWith(
+              name: _nameController.text,
+              email: _emailController.text,
+              role: _role,
+              status: _status,
+              isVerified: _isVerified,
+            );
+            widget.onSave(updatedUser);
+            Navigator.pop(context);
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ConstantString.lightBlue,
+            foregroundColor: Colors.white,
+          ),
+          child: const Text('Save'),
+        ),
+      ],
+    );
+  }
+}
