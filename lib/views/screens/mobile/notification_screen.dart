@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vults/core/constants/constant_string.dart';
+import 'package:vults/model/notification_model.dart';
+import 'package:vults/viewmodels/bloc/notification/notification_bloc.dart';
 import 'package:vults/views/widgets/mobile/app_bar.dart';
 
 class NotificationScreen extends StatefulWidget {
@@ -7,10 +10,15 @@ class NotificationScreen extends StatefulWidget {
 
   @override
   NotificationScreenState createState() => NotificationScreenState();
-  
 }
 
 class NotificationScreenState extends State<NotificationScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<NotificationBloc>().add(LoadNotificationsRequested());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,64 +39,27 @@ class NotificationScreenState extends State<NotificationScreen> {
             colors: [ConstantString.lightGrey, ConstantString.darkBlue],
           ),
         ),
-        child: ListView(
-          padding: EdgeInsets.all(16),
-          children: [
-            SizedBox(height: 70),
-            _buildNotificationItem(
-              context,
-              title: "Notification",
-              message: "You've received ₱100.00....",
-              fullMessage:
-                  "You have received ₱100.00 from (sender name).\n\nYou can track this transaction using Ref.\n(ref=(ref_Num)).",
-            ),
-            _buildNotificationItem(
-              context,
-              title: "Alert!",
-              message: "You've recently logged into....",
-              fullMessage:
-                  "You have recently logged into this new device:\n(device name).",
-              isAlert: true,
-            ),
-            _buildNotificationItem(
-              context,
-              title: "Update",
-              message: "You've successfully updated your...",
-              fullMessage:
-                  "You have successfully updated your profile.\nTo see the update click the profile section.",
-              isUpdate: true,
-            ),
-            _buildNotificationItem(
-              context,
-              title: "Notification",
-              message: "You've received ₱100.00....",
-              fullMessage:
-                  "You have received ₱100.00 from (sender name).\n\nYou can track this transaction using Ref.\n(ref=(ref_Num)).",
-            ),
-            _buildNotificationItem(
-              context,
-              title: "Alert!",
-              message: "You've recently logged into....",
-              fullMessage:
-                  "You have recently logged into this new device:\n(device name).",
-              isAlert: true,
-            ),
-            _buildNotificationItem(
-              context,
-              title: "Update",
-              message: "You've successfully updated your...",
-              fullMessage:
-                  "You have successfully updated your profile.\nTo see the update click the profile section.",
-              isUpdate: true,
-            ),
-            _buildNotificationItem(
-              context,
-              title: "Notification",
-              message: "You've received ₱100.00....",
-              fullMessage:
-                  "You have received ₱100.00 from (sender name).\n\nYou can track this transaction using Ref.\n(ref=(ref_Num)).",
-            ),
-          ],
+        child: BlocBuilder<NotificationBloc, NotificationState>(
+          builder: (context, state) {
+            if (state is NotificationLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is NotificationsLoaded) {
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: state.notifications.length,
+                itemBuilder: (context, index) {
+                  final notification = state.notifications[index];
+                  return _buildNotificationItem(
+                    context,
+                    notification: notification,
+                  );
+                },
+              );
+            } else if (state is NotificationError) {
+              return Center(child: Text('Error: ${state.message}'));
+            }
+            return const Center(child: Text('No notifications'));
+          },
         ),
       ),
     );
@@ -96,18 +67,17 @@ class NotificationScreenState extends State<NotificationScreen> {
 
   Widget _buildNotificationItem(
     BuildContext context, {
-    required String title,
-    required String message,
-    required String fullMessage,
-    bool isAlert = false,
-    bool isUpdate = false,
+    required NotificationModel notification,
   }) {
+    bool isAlert = notification.type == NotificationType.security.toString();
+    bool isUpdate = notification.type == NotificationType.system.toString();
+
     return Card(
-      margin: EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: ConstantString.white,
       child: ListTile(
-        contentPadding: EdgeInsets.all(16),
+        contentPadding: const EdgeInsets.all(16),
         leading: Container(
           width: 40,
           height: 40,
@@ -135,7 +105,7 @@ class NotificationScreenState extends State<NotificationScreen> {
           ),
         ),
         title: Text(
-          title,
+          notification.title,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontFamily: ConstantString.fontFredokaOne,
@@ -143,21 +113,28 @@ class NotificationScreenState extends State<NotificationScreen> {
           ),
         ),
         subtitle: Text(
-          message,
+          notification.message,
           style: TextStyle(
             fontFamily: ConstantString.fontFredoka,
             color: ConstantString.grey,
           ),
         ),
-        onTap:
-            () => _showNotificationDetails(
-              context,
-              title,
-              fullMessage,
-              isAlert
-                  ? Icons.warning
-                  : (isUpdate ? Icons.update : Icons.notifications),
-            ),
+        onTap: () {
+          _showNotificationDetails(
+            context,
+            notification.title,
+            notification.message,
+            isAlert
+                ? Icons.warning
+                : (isUpdate ? Icons.update : Icons.notifications),
+          );
+          // Mark notification as read when opened
+          if (!notification.isRead) {
+            context.read<NotificationBloc>().add(
+              MarkNotificationAsReadRequested(notification.id),
+            );
+          }
+        },
       ),
     );
   }
