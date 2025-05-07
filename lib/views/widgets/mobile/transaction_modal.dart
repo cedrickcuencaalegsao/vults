@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:vults/core/constants/constant_string.dart';
+import 'package:vults/model/transaction_model.dart';
 
 class TransactionModal extends StatelessWidget {
-  final Map<String, String> transaction;
+  final Transaction transaction;
 
   const TransactionModal({Key? key, required this.transaction})
     : super(key: key);
@@ -21,7 +22,7 @@ class TransactionModal extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  transaction["type"]!,
+                  transaction.type.toString().split('.').last.toUpperCase(),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -34,44 +35,41 @@ class TransactionModal extends StatelessWidget {
                   child: IconButton(
                     icon: Icon(Icons.close, color: ConstantString.darkBlue),
                     iconSize: 22,
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+                    onPressed: () => Navigator.pop(context),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
-              "Send to:",
+              transaction.type == TransactionType.send
+                  ? "Send to:"
+                  : "Received from:",
               style: TextStyle(fontSize: 16, color: ConstantString.grey),
             ),
             Text(
-              "Firstname Lastname",
+              transaction.type == TransactionType.send
+                  ? transaction.receiverId
+                  : transaction.senderId,
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: ConstantString.darkBlue,
               ),
             ),
-            SizedBox(height: 10),
-            Text(
-              "0000-0000-0000",
-              style: TextStyle(fontSize: 16, color: ConstantString.grey),
-            ),
-            Divider(),
+            const Divider(),
             Align(
               alignment: Alignment.centerRight,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    transaction["date"]!,
+                    transaction.formattedDate,
                     style: TextStyle(fontSize: 16, color: ConstantString.grey),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    transaction["amount"]!,
+                    transaction.formattedAmount,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -81,15 +79,15 @@ class TransactionModal extends StatelessWidget {
                 ],
               ),
             ),
-            Divider(),
+            const Divider(),
             Align(
               alignment: Alignment.centerRight,
               child: Text(
-                transaction["ref"]!,
+                'Ref No. ${transaction.id}',
                 style: TextStyle(fontSize: 14, color: ConstantString.grey),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [

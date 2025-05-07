@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vults/core/constants/constant_string.dart';
+import 'package:vults/model/transaction_model.dart';
+import 'package:vults/viewmodels/bloc/transaction/transaction_bloc.dart';
 import 'package:vults/views/widgets/mobile/transaction_modal.dart';
 
 class TransactionScreen extends StatefulWidget {
@@ -10,6 +13,13 @@ class TransactionScreen extends StatefulWidget {
 
 class TransactionScreenState extends State<TransactionScreen> {
   String sortOrder = 'Date Ascending';
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<TransactionBloc>().add(LoadTransactionsRequested());
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -79,97 +89,90 @@ class TransactionScreenState extends State<TransactionScreen> {
               colors: [ConstantString.lightBlue, ConstantString.darkBlue],
             ),
           ),
-          child: Column(
-            children: [
-              SizedBox(height: kToolbarHeight + 16),
-              Container(
-                alignment: Alignment.centerLeft,
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: TabBar(
-                  labelColor: Colors.white,
-                  unselectedLabelColor: Colors.white70,
-                  indicatorColor: Colors.transparent,
-                  isScrollable: false,
-                  labelPadding: EdgeInsets.symmetric(horizontal: 8),
-                  tabs: [
-                    Tab(text: "All"),
-                    Tab(text: "Sent"),
-                    Tab(text: "Received"),
-                    Tab(text: "Transfer"),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: TabBarView(
+          child: BlocBuilder<TransactionBloc, TransactionState>(
+            builder: (context, state) {
+              if (state is TransactionLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (state is TransactionsLoaded) {
+                return Column(
                   children: [
-                    _buildTransactionList(context),
-                    _buildTransactionList(context, type: "Sent"),
-                    _buildTransactionList(context, type: "Received"),
-                    _buildTransactionList(context, type: "Transfer"),
+                    SizedBox(height: kToolbarHeight + 16),
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: TabBar(
+                        labelColor: Colors.white,
+                        unselectedLabelColor: Colors.white70,
+                        indicatorColor: Colors.transparent,
+                        isScrollable: false,
+                        labelPadding: EdgeInsets.symmetric(horizontal: 8),
+                        tabs: [
+                          Tab(text: "All"),
+                          Tab(text: "Sent"),
+                          Tab(text: "Received"),
+                          Tab(text: "Transfer"),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          _buildTransactionList(context, state.transactions),
+                          _buildTransactionList(
+                            context,
+                            state.transactions,
+                            type: TransactionType.send,
+                          ),
+                          _buildTransactionList(
+                            context,
+                            state.transactions,
+                            type: TransactionType.receive,
+                          ),
+                          _buildTransactionList(context, state.transactions),
+                        ],
+                      ),
+                    ),
                   ],
-                ),
-              ),
-            ],
+                );
+              }
+              if (state is TransactionError) {
+                return Center(child: Text(state.message));
+              }
+              return const Center(child: Text('No transactions found'));
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _buildTransactionList(BuildContext context, {String? type}) {
-    final transactions = [
-      {
-        "type": "Sent",
-        "amount": "₱100.00",
-        "ref": "Ref No. 123456789012345",
-        "date": "April 4, 2025",
-      },
-      {
-        "type": "Received",
-        "amount": "₱100.00",
-        "ref": "Ref No. 123456789012345",
-        "date": "April 3, 2025",
-      },
-      {
-        "type": "Transfer",
-        "amount": "₱100.00",
-        "ref": "Ref No. 123456789012345",
-        "date": "April 3, 2025",
-      },
-      {
-        "type": "Cash Out",
-        "amount": "₱100.00",
-        "ref": "Ref No. 123456789012345",
-        "date": "April 2, 2025",
-      },
-      {
-        "type": "Cash In",
-        "amount": "₱100.00",
-        "ref": "Ref No. 123456789012345",
-        "date": "April 1, 2025",
-      },
-    ];
-    final filteredTransactions =
-        type == null
-            ? transactions
-            : transactions.where((t) => t["type"] == type).toList();
+  Widget _buildTransactionList(
+    BuildContext context,
+    List<Transaction> transactions, {
+    TransactionType? type,
+  }) {
+    var filteredTransactions =
+        type != null
+            ? transactions.where((t) => t.type == type).toList()
+            : transactions;
+
     if (sortOrder == 'Date Ascending') {
-      filteredTransactions.sort((a, b) => a["date"]!.compareTo(b["date"]!));
-    } else if (sortOrder == 'Date Descending') {
-      filteredTransactions.sort((a, b) => b["date"]!.compareTo(a["date"]!));
+      filteredTransactions.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    } else {
+      filteredTransactions.sort((a, b) => b.timestamp.compareTo(a.timestamp));
     }
+
     return ListView.builder(
-      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       itemCount: filteredTransactions.length,
       itemBuilder: (context, index) {
         final transaction = filteredTransactions[index];
         return GestureDetector(
-          onTap: () {
-            _showTransactionDetails(context, transaction);
-          },
+          onTap: () => _showTransactionDetails(context, transaction),
           child: Container(
-            margin: EdgeInsets.only(bottom: 12),
-            padding: EdgeInsets.all(12),
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
@@ -181,24 +184,28 @@ class TransactionScreenState extends State<TransactionScreen> {
                 Row(
                   children: [
                     Icon(
-                      _getTransactionIcon(transaction["type"]!),
+                      _getTransactionIcon(transaction.type),
                       color: Colors.black,
                       size: 24,
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          transaction["type"]!,
-                          style: TextStyle(
+                          transaction.type
+                              .toString()
+                              .split('.')
+                              .last
+                              .toUpperCase(),
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
                         ),
                         Text(
-                          transaction["amount"]!,
+                          transaction.formattedAmount,
                           style: TextStyle(fontSize: 14, color: Colors.black54),
                         ),
                       ],
@@ -209,11 +216,11 @@ class TransactionScreenState extends State<TransactionScreen> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      transaction["ref"]!,
+                      'Ref No. ${transaction.id}',
                       style: TextStyle(fontSize: 12, color: Colors.black45),
                     ),
                     Text(
-                      transaction["date"]!,
+                      transaction.formattedDate,
                       style: TextStyle(fontSize: 12, color: Colors.black45),
                     ),
                   ],
@@ -226,30 +233,32 @@ class TransactionScreenState extends State<TransactionScreen> {
     );
   }
 
-  IconData _getTransactionIcon(String type) {
+  IconData _getTransactionIcon(TransactionType type) {
     switch (type) {
-      case "Sent":
+      case TransactionType.send:
         return Icons.arrow_upward;
-      case "Received":
+      case TransactionType.receive:
         return Icons.arrow_downward;
-      case "Transfer":
-        return Icons.swap_horiz;
-      case "Cash Out":
-        return Icons.account_balance_wallet;
-      case "Cash In":
-        return Icons.attach_money;
       default:
         return Icons.monetization_on;
     }
   }
 
-  void _showTransactionDetails(
-    BuildContext context,
-    Map<String, String> transaction,
-  ) {
+  void _showTransactionDetails(BuildContext context, Transaction transaction) {
+    context.read<TransactionBloc>().add(
+      LoadTransactionDetailsRequested(transaction.id),
+    );
     showDialog(
       context: context,
-      builder: (context) => TransactionModal(transaction: transaction),
+      builder:
+          (context) => BlocBuilder<TransactionBloc, TransactionState>(
+            builder: (context, state) {
+              if (state is TransactionDetailsLoaded) {
+                return TransactionModal(transaction: state.transaction);
+              }
+              return const Center(child: CircularProgressIndicator());
+            },
+          ),
     );
   }
 }
