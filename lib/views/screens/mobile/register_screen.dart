@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vults/core/constants/constant_string.dart';
-import '../../widgets/mobile/app_bar.dart';
-import '../../widgets/mobile/buttons.dart';
-import '../../widgets/mobile/inputs.dart';
-import '../../widgets/mobile/registration_progress.dart';
+import 'package:vults/views/widgets/mobile/app_bar.dart';
+import 'package:vults/views/widgets/mobile/buttons.dart';
+import 'package:vults/views/widgets/mobile/inputs.dart';
+import 'package:vults/views/widgets/mobile/registration_progress.dart';
 import 'package:vults/views/widgets/mobile/error.dart';
+import 'package:vults/views/widgets/mobile/success.dart';
+import 'package:vults/viewmodels/bloc/auth/auth_bloc.dart';
 
 class RegisterFirstScreen extends StatefulWidget {
   const RegisterFirstScreen({super.key});
@@ -548,25 +551,37 @@ class RegisterThirdScreen extends StatefulWidget {
 }
 
 class RegisterThirdScreenState extends State<RegisterThirdScreen> {
+  late final AuthBloc _authBloc;
   bool _isLoading = false;
 
-  void _navigate() async {
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      Navigator.pushNamed(context, "/landing");
-    }
+  @override
+  void initState() {
+    super.initState();
+    _authBloc = BlocProvider.of<AuthBloc>(context);
+  }
 
-    debugPrint('Navigating to landing screen...');
-    debugPrint('First Name: ${widget.firstName}');
-    debugPrint('Middle Name: ${widget.middleName}');
-    debugPrint('Last Name: ${widget.lastName}');
-    debugPrint('Email: ${widget.email}');
-    debugPrint('Confirm Email: ${widget.confirmEmail}');
-    debugPrint('Birthday: ${widget.birthday}');
-    debugPrint('PIN: ${widget.pin}');
-    debugPrint('Confirm PIN: ${widget.confirmPin}');
-    setState(() => _isLoading = false);
+  void _navigate() {
+    try {
+      final dateParts = widget.birthday.split('/');
+      final formattedDate = DateTime(
+        int.parse(dateParts[2]), // year
+        int.parse(dateParts[0]), // month
+        int.parse(dateParts[1]), // day
+      );
+
+      _authBloc.add(
+        AuthRegisterRequested(
+          email: widget.email,
+          firstName: widget.firstName,
+          middleName: widget.middleName,
+          lastName: widget.lastName,
+          birthday: formattedDate,
+          pin: widget.pin,
+        ),
+      );
+    } catch (e) {
+      ErrorSnackBar.show(context: context, message: 'Invalid date format');
+    }
   }
 
   @override
@@ -574,82 +589,105 @@ class RegisterThirdScreenState extends State<RegisterThirdScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: CustomAppBar(
-        title: "Register New Account",
-        iconColor: ConstantString.darkBlue,
-        fontColor: ConstantString.darkBlue,
-        fontSize: 20,
-        fontFamily: ConstantString.fontFredokaOne,
-        fontWeight: FontWeight.bold,
-      ),
-      body: Container(
-        height: screenHeight,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
-            colors: [ConstantString.darkBlue, ConstantString.white],
-          ),
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthLoading) {
+          setState(() => _isLoading = true);
+        } else {
+          setState(() => _isLoading = false);
+
+          if (state is AuthAuthenticated) {
+            SuccessSnackBar.show(
+              context: context,
+              message: 'Account created successfully.',
+            );
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/landing',
+              (route) => false,
+            );
+          } else if (state is AuthError) {
+            ErrorSnackBar.show(context: context, message: state.message);
+          }
+        }
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: CustomAppBar(
+          title: "Register New Account",
+          iconColor: ConstantString.darkBlue,
+          fontColor: ConstantString.darkBlue,
+          fontSize: 20,
+          fontFamily: ConstantString.fontFredokaOne,
+          fontWeight: FontWeight.bold,
         ),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + kToolbarHeight + 20,
-              bottom: 20,
+        body: Container(
+          height: screenHeight,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              colors: [ConstantString.darkBlue, ConstantString.white],
             ),
-            child: Column(
-              children: <Widget>[
-                SizedBox(height: screenHeight * 0.07),
-                Icon(
-                  Icons.playlist_add_check_rounded,
-                  color: ConstantString.green,
-                  size: 200,
-                ),
-                // SizedBox(height: screenHeight * 0.02),
-                Text(
-                  "Informatin",
-                  style: TextStyle(
+          ),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top + kToolbarHeight + 20,
+                bottom: 20,
+              ),
+              child: Column(
+                children: <Widget>[
+                  SizedBox(height: screenHeight * 0.07),
+                  Icon(
+                    Icons.playlist_add_check_rounded,
+                    color: ConstantString.green,
+                    size: 200,
+                  ),
+                  // SizedBox(height: screenHeight * 0.02),
+                  Text(
+                    "Informatin",
+                    style: TextStyle(
+                      color: ConstantString.darkBlue,
+                      fontSize: 35,
+                      fontFamily: ConstantString.fontFredokaOne,
+                    ),
+                  ),
+                  Text(
+                    "Ready.",
+                    style: TextStyle(
+                      color: ConstantString.darkBlue,
+                      fontSize: 35,
+                      fontFamily: ConstantString.fontFredokaOne,
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.15),
+                  Text(
+                    "Click continue to fully register.",
+                    style: TextStyle(
+                      fontFamily: ConstantString.fontFredoka,
+                      fontSize: 18,
+                      color: ConstantString.white,
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.03),
+                  CustomButton(
+                    text: ConstantString.continueTxt,
                     color: ConstantString.darkBlue,
-                    fontSize: 35,
+                    textColor: ConstantString.white,
+                    fontSize: screenHeight * 0.025,
+                    fontWeight: FontWeight.bold,
                     fontFamily: ConstantString.fontFredokaOne,
+                    width: screenWidth * 0.8,
+                    height: screenHeight * 0.06,
+                    borderRadius: 30,
+                    isLoading: _isLoading,
+                    onPressed: _navigate,
                   ),
-                ),
-                Text(
-                  "Ready.",
-                  style: TextStyle(
-                    color: ConstantString.darkBlue,
-                    fontSize: 35,
-                    fontFamily: ConstantString.fontFredokaOne,
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.15),
-                Text(
-                  "Click continue to fully register.",
-                  style: TextStyle(
-                    fontFamily: ConstantString.fontFredoka,
-                    fontSize: 18,
-                    color: ConstantString.white,
-                  ),
-                ),
-                SizedBox(height: screenHeight * 0.03),
-                CustomButton(
-                  text: ConstantString.continueTxt,
-                  color: ConstantString.darkBlue,
-                  textColor: ConstantString.white,
-                  fontSize: screenHeight * 0.025,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: ConstantString.fontFredokaOne,
-                  width: screenWidth * 0.8,
-                  height: screenHeight * 0.06,
-                  borderRadius: 30,
-                  isLoading: _isLoading,
-                  onPressed: _navigate,
-                ),
-                SizedBox(height: screenHeight * 0.05),
-                RegistrationProgress(currentStep: 3),
-              ],
+                  SizedBox(height: screenHeight * 0.05),
+                  RegistrationProgress(currentStep: 3),
+                ],
+              ),
             ),
           ),
         ),

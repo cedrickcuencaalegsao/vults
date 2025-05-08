@@ -12,7 +12,6 @@ class LandingScreen extends StatelessWidget {
     Navigator.pushNamed(context, '/register');
   }
 
-
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;

@@ -41,48 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAxXiMXIKg3crx8U1svhikr9p-dhnW-EQY',
-    appId: '1:375939365635:web:bcaafb2ad65d327d3c4736',
-    messagingSenderId: '375939365635',
-    projectId: 'volts-app-70252',
-    authDomain: 'volts-app-70252.firebaseapp.com',
-    storageBucket: 'volts-app-70252.firebasestorage.app',
-    measurementId: 'G-0SD6B2PX3D',
+    apiKey: 'AIzaSyDIgEIE6u8PWJrkQWr1z62Id6SvBLXgnWA',
+    appId: '1:616628955250:web:652692e126a8e9cc22faeb',
+    messagingSenderId: '616628955250',
+    projectId: 'vults-app-dev',
+    authDomain: 'vults-app-dev.firebaseapp.com',
+    storageBucket: 'vults-app-dev.firebasestorage.app',
+    measurementId: 'G-BZS3888190',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDa-PK9dKHnwdzfO9lswENn6X_s6MXi3Hk',
-    appId: '1:375939365635:android:d55ab11ae2ad86bb3c4736',
-    messagingSenderId: '375939365635',
-    projectId: 'volts-app-70252',
-    storageBucket: 'volts-app-70252.firebasestorage.app',
+    apiKey: 'AIzaSyBOwcNMiYwPRDZNDFJCI7ox0zXDMEGCGnY',
+    appId: '1:616628955250:android:6d80eb3aa65e7cd822faeb',
+    messagingSenderId: '616628955250',
+    projectId: 'vults-app-dev',
+    storageBucket: 'vults-app-dev.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDtLFGS8EpxmTQrjn1IMcm_GfaHUTKScNk',
-    appId: '1:375939365635:ios:299d17e772b7d6d53c4736',
-    messagingSenderId: '375939365635',
-    projectId: 'volts-app-70252',
-    storageBucket: 'volts-app-70252.firebasestorage.app',
+    apiKey: 'AIzaSyCYpaNMwFqqcqom9PLyHkavgq_y7COJMgI',
+    appId: '1:616628955250:ios:91e56e533f88069c22faeb',
+    messagingSenderId: '616628955250',
+    projectId: 'vults-app-dev',
+    storageBucket: 'vults-app-dev.firebasestorage.app',
     iosBundleId: 'com.example.vults',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDtLFGS8EpxmTQrjn1IMcm_GfaHUTKScNk',
-    appId: '1:375939365635:ios:299d17e772b7d6d53c4736',
-    messagingSenderId: '375939365635',
-    projectId: 'volts-app-70252',
-    storageBucket: 'volts-app-70252.firebasestorage.app',
+    apiKey: 'AIzaSyCYpaNMwFqqcqom9PLyHkavgq_y7COJMgI',
+    appId: '1:616628955250:ios:91e56e533f88069c22faeb',
+    messagingSenderId: '616628955250',
+    projectId: 'vults-app-dev',
+    storageBucket: 'vults-app-dev.firebasestorage.app',
     iosBundleId: 'com.example.vults',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAxXiMXIKg3crx8U1svhikr9p-dhnW-EQY',
-    appId: '1:375939365635:web:23a959f4d6f22ca53c4736',
-    messagingSenderId: '375939365635',
-    projectId: 'volts-app-70252',
-    authDomain: 'volts-app-70252.firebaseapp.com',
-    storageBucket: 'volts-app-70252.firebasestorage.app',
-    measurementId: 'G-9LZS3Y3655',
+    apiKey: 'AIzaSyDIgEIE6u8PWJrkQWr1z62Id6SvBLXgnWA',
+    appId: '1:616628955250:web:6df5dde9ca9285d622faeb',
+    messagingSenderId: '616628955250',
+    projectId: 'vults-app-dev',
+    authDomain: 'vults-app-dev.firebaseapp.com',
+    storageBucket: 'vults-app-dev.firebasestorage.app',
+    measurementId: 'G-3N37END00S',
   );
+
 }
