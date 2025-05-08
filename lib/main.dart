@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vults/core/constants/constant_string.dart';
+import 'package:vults/viewmodels/bloc/auth/auth_bloc.dart';
 // Mobile Views.
 import 'package:vults/views/screens/mobile/register_screen.dart' as mobile;
 import 'package:vults/views/screens/mobile/sendmoney_screen.dart' as mobile;
@@ -33,7 +35,13 @@ import './firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MainApp());
+  // runApp(const MainApp());
+  runApp(
+    BlocProvider(
+      create: (context) => AuthBloc(),
+      child: const MainApp(),
+    ),
+  );
 }
 
 class MainApp extends StatelessWidget {

@@ -3,7 +3,8 @@ import 'package:equatable/equatable.dart';
 enum UserStatus { active, inactive, blocked }
 
 class User extends Equatable {
-  final String id;
+  final String? id;
+  final double? isAdmin;
   final String email;
   final String firstName;
   final String? middleName;
@@ -20,6 +21,7 @@ class User extends Equatable {
 
   const User({
     required this.id,
+    required this.isAdmin,
     required this.email,
     required this.firstName,
     this.middleName,
@@ -43,6 +45,7 @@ class User extends Equatable {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] as String,
+      isAdmin: json['isAdmin'] as double?,
       email: json['email'] as String,
       firstName: json['firstName'] as String,
       middleName: json['middleName'] as String?,
@@ -71,6 +74,7 @@ class User extends Equatable {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'isAdmin': isAdmin,
       'email': email,
       'firstName': firstName,
       'middleName': middleName,
@@ -89,6 +93,7 @@ class User extends Equatable {
 
   User copyWith({
     String? id,
+    double? isAdmin,
     String? email,
     String? firstName,
     String? middleName,
@@ -105,6 +110,7 @@ class User extends Equatable {
   }) {
     return User(
       id: id ?? this.id,
+      isAdmin: isAdmin ?? this.isAdmin,
       email: email ?? this.email,
       firstName: firstName ?? this.firstName,
       middleName: middleName ?? this.middleName,
@@ -124,6 +130,7 @@ class User extends Equatable {
   @override
   List<Object?> get props => [
     id,
+    isAdmin,
     email,
     firstName,
     middleName,

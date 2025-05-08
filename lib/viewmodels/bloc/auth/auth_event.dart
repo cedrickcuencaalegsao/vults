@@ -9,16 +9,20 @@ abstract class AuthEvent extends Equatable {
 }
 
 class AuthLoginRequested extends AuthEvent {
+  final String email;
   final String pin;
 
-  const AuthLoginRequested({required this.pin});
+  const AuthLoginRequested({
+    required this.email,
+    required this.pin,
+  });
 
   @override
-  List<Object> get props => [pin];
+  List<Object> get props => [email, pin];
 }
 
 class AuthRegisterRequested extends AuthEvent {
-  final String email;
+final String email;
   final String firstName;
   final String? middleName;
   final String lastName;
@@ -36,13 +40,13 @@ class AuthRegisterRequested extends AuthEvent {
 
   @override
   List<Object?> get props => [
-    email,
-    firstName,
-    middleName,
-    lastName,
-    birthday,
-    pin,
-  ];
+        email,
+        firstName,
+        middleName,
+        lastName,
+        birthday,
+        pin,
+      ];
 }
 
 class AuthLogoutRequested extends AuthEvent {}
