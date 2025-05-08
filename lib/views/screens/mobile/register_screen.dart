@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/constant_string.dart';
+import 'package:vults/core/constants/constant_string.dart';
 import '../../widgets/mobile/app_bar.dart';
 import '../../widgets/mobile/buttons.dart';
 import '../../widgets/mobile/inputs.dart';
 import '../../widgets/mobile/registration_progress.dart';
+import 'package:vults/views/widgets/mobile/error.dart';
 
 class RegisterFirstScreen extends StatefulWidget {
   const RegisterFirstScreen({super.key});
@@ -16,12 +17,35 @@ class RegisterFirstScreenState extends State<RegisterFirstScreen> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _middleNameController = TextEditingController();
-  final String _agreement = "agreement";
-  final bool _read = false;
-  final bool _agree = false;
+  bool _read = false;
+  bool _agree = false;
   bool _isLoading = false;
 
   void _navigate() async {
+    if (_firstNameController.text.isEmpty) {
+      ErrorSnackBar.show(
+        context: context,
+        message: 'First name is required.',
+      );
+      return;
+    }
+    
+    if (_lastNameController.text.isEmpty) {
+      ErrorSnackBar.show(
+        context: context,
+        message: 'Last name is required.',
+      );
+      return;
+    }
+
+    if (!_read || !_agree) {
+      ErrorSnackBar.show(
+        context: context,
+        message: 'Please read and agree to the policy.',
+      );
+      return;
+    }
+    
     setState(() => _isLoading = true);
     await Future.delayed(const Duration(seconds: 2));
     if (mounted) {
@@ -29,7 +53,7 @@ class RegisterFirstScreenState extends State<RegisterFirstScreen> {
         context,
         MaterialPageRoute(builder: (context) => const RegisterSecondScreen()),
       );
-    } // Simulate loading
+    }
     setState(() => _isLoading = false);
   }
 
@@ -81,13 +105,6 @@ class RegisterFirstScreenState extends State<RegisterFirstScreen> {
                     hintText: ConstantString.fistname,
                     prefixIcon: Icons.person_2_rounded,
                     controller: _firstNameController,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
-                      }
-                      return null;
-                    },
                     width: MediaQuery.of(context).size.width * 0.8,
                   ),
                   SizedBox(height: screenHeight * 0.02),
@@ -95,13 +112,6 @@ class RegisterFirstScreenState extends State<RegisterFirstScreen> {
                     hintText: ConstantString.middlename,
                     prefixIcon: Icons.person_2_rounded,
                     controller: _middleNameController,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
-                      }
-                      return null;
-                    },
                     width: MediaQuery.of(context).size.width * 0.8,
                   ),
                   SizedBox(height: screenHeight * 0.02),
@@ -109,13 +119,6 @@ class RegisterFirstScreenState extends State<RegisterFirstScreen> {
                     hintText: ConstantString.lastname,
                     prefixIcon: Icons.person_2_rounded,
                     controller: _lastNameController,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
-                      }
-                      return null;
-                    },
                     width: MediaQuery.of(context).size.width * 0.8,
                   ),
                   SizedBox(height: screenHeight * 0.05),
@@ -127,43 +130,87 @@ class RegisterFirstScreenState extends State<RegisterFirstScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Radio(
-                              value: _read,
-                              groupValue: _agreement,
-                              onChanged: (value) {
-                                debugPrint('Radio $value');
-                              },
-                            ),
-                            Text(
-                              ConstantString.readPolicy,
-                              style: TextStyle(
-                                color: ConstantString.white,
-                                fontSize: 15,
-                                fontFamily: ConstantString.fontFredoka,
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _read = !_read; // Toggle the state
+                            });
+                          },
+                          child: Row(
+                            children: [
+                              Radio<bool>(
+                                value: true,
+                                groupValue: _read, // Current state
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    _read = value ?? false;
+                                  });
+                                },
+                                activeColor: ConstantString.white,
+                                fillColor: WidgetStateProperty.resolveWith<
+                                  Color
+                                >((Set<WidgetState> states) {
+                                  if (states.contains(WidgetState.disabled)) {
+                                    return Colors.grey;
+                                  }
+                                  return ConstantString.white;
+                                }),
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.padded,
                               ),
-                            ),
-                          ],
+                              Text(
+                                _read
+                                    ? ConstantString.readPolicy
+                                    : ConstantString.readPolicy,
+                                style: TextStyle(
+                                  color: ConstantString.white,
+                                  fontSize: 15,
+                                  fontFamily: ConstantString.fontFredoka,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        Row(
-                          children: [
-                            Radio(
-                              value: _agree,
-                              groupValue: _agreement,
-                              onChanged: (value) {
-                                debugPrint('Radio $value');
-                              },
-                            ),
-                            Text(
-                              ConstantString.agreePolicy,
-                              style: TextStyle(
-                                color: ConstantString.white,
-                                fontSize: 15,
-                                fontFamily: ConstantString.fontFredoka,
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _agree = !_agree; // Toggle the state
+                            });
+                          },
+                          child: Row(
+                            children: [
+                              Radio<bool>(
+                                value: true,
+                                groupValue: _agree, // Current state
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    _agree = value ?? false;
+                                  });
+                                },
+                                activeColor: ConstantString.white,
+                                fillColor: WidgetStateProperty.resolveWith<
+                                  Color
+                                >((Set<WidgetState> states) {
+                                  if (states.contains(WidgetState.disabled)) {
+                                    return Colors.grey;
+                                  }
+                                  return ConstantString.white;
+                                }),
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.padded,
                               ),
-                            ),
-                          ],
+                              Text(
+                                _agree
+                                    ? ConstantString.agreePolicy
+                                    : ConstantString.agreePolicy,
+                                style: TextStyle(
+                                  color: ConstantString.white,
+                                  fontSize: 15,
+                                  fontFamily: ConstantString.fontFredoka,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -443,11 +490,14 @@ class RegisterThirdScreenState extends State<RegisterThirdScreen> {
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.15),
-                Text("Click continue to fully register.", style: TextStyle(
-                  fontFamily: ConstantString.fontFredoka,
-                  fontSize: 18,
-                  color: ConstantString.white,
-                ),),
+                Text(
+                  "Click continue to fully register.",
+                  style: TextStyle(
+                    fontFamily: ConstantString.fontFredoka,
+                    fontSize: 18,
+                    color: ConstantString.white,
+                  ),
+                ),
                 SizedBox(height: screenHeight * 0.03),
                 CustomButton(
                   text: ConstantString.continueTxt,
