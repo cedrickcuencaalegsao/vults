@@ -23,18 +23,12 @@ class RegisterFirstScreenState extends State<RegisterFirstScreen> {
 
   void _navigate() async {
     if (_firstNameController.text.isEmpty) {
-      ErrorSnackBar.show(
-        context: context,
-        message: 'First name is required.',
-      );
+      ErrorSnackBar.show(context: context, message: 'First name is required.');
       return;
     }
-    
+
     if (_lastNameController.text.isEmpty) {
-      ErrorSnackBar.show(
-        context: context,
-        message: 'Last name is required.',
-      );
+      ErrorSnackBar.show(context: context, message: 'Last name is required.');
       return;
     }
 
@@ -45,13 +39,23 @@ class RegisterFirstScreenState extends State<RegisterFirstScreen> {
       );
       return;
     }
-    
+    final firstName = _firstNameController.text;
+    final middleName = _middleNameController.text;
+    final lastName = _lastNameController.text;
+
     setState(() => _isLoading = true);
     await Future.delayed(const Duration(seconds: 2));
     if (mounted) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const RegisterSecondScreen()),
+        MaterialPageRoute(
+          builder:
+              (context) => RegisterSecondScreen(
+                firstName: firstName,
+                middleName: middleName,
+                lastName: lastName,
+              ),
+        ),
       );
     }
     setState(() => _isLoading = false);
@@ -242,7 +246,16 @@ class RegisterFirstScreenState extends State<RegisterFirstScreen> {
 }
 
 class RegisterSecondScreen extends StatefulWidget {
-  const RegisterSecondScreen({super.key});
+  final String firstName;
+  final String middleName;
+  final String lastName;
+
+  const RegisterSecondScreen({
+    super.key,
+    required this.firstName,
+    required this.middleName,
+    required this.lastName,
+  });
 
   @override
   RegisterSecondScreenState createState() => RegisterSecondScreenState();
@@ -257,12 +270,103 @@ class RegisterSecondScreenState extends State<RegisterSecondScreen> {
   bool _isLoading = false;
 
   void _navigate() async {
+    if (_email.text.isEmpty) {
+      ErrorSnackBar.show(context: context, message: 'Email is required.');
+      return;
+    }
+
+    if (_confirmEmail.text.isEmpty) {
+      ErrorSnackBar.show(
+        context: context,
+        message: 'Confirm email is required.',
+      );
+      return;
+    }
+
+    if (_confirmEmail.text != _email.text) {
+      ErrorSnackBar.show(
+        context: context,
+        message: 'Email and confirm email do not match.',
+      );
+      return;
+    }
+
+    if (_birthday.text.isEmpty) {
+      ErrorSnackBar.show(context: context, message: 'Birthday is required.');
+      return;
+    }
+
+    // Validate birthday format (mm/dd/yyyy)
+    final birthdayRegex = RegExp(
+      r'^(0[1-9]|1[0-2])/(0[1-9]|[12][0-9]|3[01])/\d{4}$',
+    );
+
+    if (!birthdayRegex.hasMatch(_birthday.text)) {
+      ErrorSnackBar.show(
+        context: context,
+        message: 'Birthday must be in mm/dd/yyyy (Month/Day/Year) format.',
+      );
+      return;
+    }
+
+    if (_pin.text.isEmpty) {
+      ErrorSnackBar.show(context: context, message: 'Pin is required.');
+      return;
+    }
+
+    if (int.tryParse(_pin.text) == null) {
+      ErrorSnackBar.show(
+        context: context,
+        message: 'Pin must be a numbers only.',
+      );
+      return;
+    }
+
+    if (_pin.text.length != 8) {
+      ErrorSnackBar.show(
+        context: context,
+        message: 'Pin must be exactly 8 digits long.',
+      );
+      return;
+    }
+
+    if (_confimPin.text.isEmpty) {
+      ErrorSnackBar.show(context: context, message: 'Confirm pin is required.');
+      return;
+    }
+
+    if (_confimPin.text != _pin.text) {
+      ErrorSnackBar.show(
+        context: context,
+        message: 'Pin and confirm pin do not match.',
+      );
+      return;
+    }
+
+    final email = _email.text;
+    final confirmEmail = _confirmEmail.text;
+    final birthday = _birthday.text;
+    final pin = _pin.text;
+    final confirmPin = _confimPin.text;
+
     setState(() => _isLoading = true);
     await Future.delayed(const Duration(seconds: 2));
     if (mounted) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const RegisterThirdScreen()),
+        MaterialPageRoute(
+          builder:
+              (context) => RegisterThirdScreen(
+                firstName: widget.firstName,
+                middleName: widget.middleName,
+                lastName: widget.lastName,
+                email: email,
+                confirmEmail: confirmEmail,
+                birthday: birthday,
+                pin: pin,
+                confirmPin: confirmPin,
+              ),
+        ),
       );
     }
     setState(() => _isLoading = false);
@@ -416,7 +520,28 @@ class RegisterSecondScreenState extends State<RegisterSecondScreen> {
 }
 
 class RegisterThirdScreen extends StatefulWidget {
-  const RegisterThirdScreen({super.key});
+  final String firstName;
+  final String middleName;
+  final String lastName;
+  final String email;
+  final String confirmEmail;
+  final String birthday;
+  final String pin;
+  final String confirmPin;
+
+  const RegisterThirdScreen({
+    super.key,
+    required this.firstName,
+    required this.middleName,
+    required this.lastName,
+    required this.email,
+    required this.confirmEmail,
+    required this.birthday,
+    required this.pin,
+    required this.confirmPin,
+  });
+
+  // const RegisterThirdScreen({super.key});
 
   @override
   RegisterThirdScreenState createState() => RegisterThirdScreenState();
@@ -431,6 +556,16 @@ class RegisterThirdScreenState extends State<RegisterThirdScreen> {
     if (mounted) {
       Navigator.pushNamed(context, "/landing");
     }
+
+    debugPrint('Navigating to landing screen...');
+    debugPrint('First Name: ${widget.firstName}');
+    debugPrint('Middle Name: ${widget.middleName}');
+    debugPrint('Last Name: ${widget.lastName}');
+    debugPrint('Email: ${widget.email}');
+    debugPrint('Confirm Email: ${widget.confirmEmail}');
+    debugPrint('Birthday: ${widget.birthday}');
+    debugPrint('PIN: ${widget.pin}');
+    debugPrint('Confirm PIN: ${widget.confirmPin}');
     setState(() => _isLoading = false);
   }
 
