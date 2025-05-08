@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "375939365635",
-    "project_id": "volts-app-70252",
-    "storage_bucket": "volts-app-70252.firebasestorage.app"
+    "project_number": "616628955250",
+    "project_id": "vults-app-dev",
+    "storage_bucket": "vults-app-dev.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:375939365635:android:d55ab11ae2ad86bb3c4736",
+        "mobilesdk_app_id": "1:616628955250:android:6d80eb3aa65e7cd822faeb",
         "android_client_info": {
           "package_name": "com.example.vults"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDa-PK9dKHnwdzfO9lswENn6X_s6MXi3Hk"
+          "current_key": "AIzaSyBOwcNMiYwPRDZNDFJCI7ox0zXDMEGCGnY"
         }
       ],
       "services": {
