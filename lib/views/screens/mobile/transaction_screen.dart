@@ -239,8 +239,8 @@ class TransactionScreenState extends State<TransactionScreen> {
         return Icons.arrow_upward;
       case TransactionType.receive:
         return Icons.arrow_downward;
-      default:
-        return Icons.monetization_on;
+      // default:
+      //   return Icons.monetization_on;
     }
   }
 
