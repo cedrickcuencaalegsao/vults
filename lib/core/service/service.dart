@@ -31,7 +31,7 @@ class AuthService {
     // Create user model
     final model.User newUser = model.User(
       id: uid,
-      isAdmin: 0,
+      isAdmin: false,
       email: email,
       firstName: firstName,
       middleName: middleName,
