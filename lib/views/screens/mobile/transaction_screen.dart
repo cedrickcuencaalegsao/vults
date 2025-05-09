@@ -186,6 +186,9 @@ class TransactionScreenState extends State<TransactionScreen> {
       itemCount: filteredTransactions.length,
       itemBuilder: (context, index) {
         final transaction = filteredTransactions[index];
+        debugPrint(
+          'Transaction: ${transaction.id}, Amount: ${transaction.amount}, Type: ${transaction.type}, Date: ${transaction.timestamp}',
+        );
         return GestureDetector(
           onTap: () => _showTransactionDetails(context, transaction),
           child: Container(

@@ -23,7 +23,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   ) async {
     emit(TransactionLoading());
     try {
-      final transactions = await _authService.getUserTransactions(); // <-- use Firestore
+      final transactions = await _authService.getUserTransactions();
       emit(TransactionsLoaded(transactions));
     } catch (e) {
       emit(TransactionError(e.toString()));
