@@ -33,7 +33,7 @@ class DownloadPdfScreenState extends State<DownloadPdfScreen> {
             _buildRadioOption("Quarterly", "Download 4 months transaction"),
             _buildRadioOption("Monthly", "Download every month transaction"),
             const Spacer(),
-            Container(
+            SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(

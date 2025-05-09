@@ -171,8 +171,8 @@ class ScanScreenState extends State<ScanScreen> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Colors.black.withOpacity(0.1),
-            Colors.black.withOpacity(0.7),
+            Colors.black.withValues(alpha: 0.1),
+            Colors.black.withValues(alpha: 0.7),
           ],
         ),
       ),
@@ -244,7 +244,7 @@ class ScannerOverlay extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // Draw semi-transparent overlay around scan area
-    final backgroundPaint = Paint()..color = Colors.black.withOpacity(0.3);
+    final backgroundPaint = Paint()..color = Colors.black.withValues(alpha: 0.3);
 
     // Draw top rectangle
     canvas.drawRect(
@@ -341,7 +341,7 @@ class ScannerOverlay extends CustomPainter {
     if (scannedBarcode?.corners != null) {
       final barcodePaint =
           Paint()
-            ..color = Colors.green.withOpacity(0.8)
+            ..color = Colors.green.withValues(alpha:  0.8)
             ..strokeWidth = 3.0
             ..style = PaintingStyle.stroke;
 

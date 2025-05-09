@@ -69,7 +69,7 @@ class DevicesScreenState extends State<DevicesScreen> {
               },
             ),
           ),
-          Container(
+            SizedBox(
             width: double.infinity,
             height: 50,
             child: ElevatedButton(

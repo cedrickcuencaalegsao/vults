@@ -521,11 +521,11 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     );
   }
 
-  void _handlePinReset() {
-    if (_pinController.text.isNotEmpty) {
-      context.read<AccountSettingsBloc>().add(
-        UpdateSecurityPin(pin: _pinController.text),
-      );
-    }
-  }
+  // void _handlePinReset() {
+  //   if (_pinController.text.isNotEmpty) {
+  //     context.read<AccountSettingsBloc>().add(
+  //       UpdateSecurityPin(pin: _pinController.text),
+  //     );
+  //   }
+  // }
 }

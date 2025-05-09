@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vults/core/constants/constant_string.dart';
 import 'package:vults/viewmodels/bloc/auth/auth_bloc.dart';
+import 'package:vults/views/widgets/mobile/error.dart';
+import 'package:vults/views/widgets/mobile/success.dart';
+import 'package:vults/views/widgets/mobile/loading.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -44,25 +47,36 @@ class LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  void _navigate(){
+    Navigator.pushReplacementNamed(context, '/dashboard');
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthLoading) {
-          // Show loading indicator
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Logging in...')));
+          LoadingSnackBar.show(
+            context: context,
+            message: 'Logging in...',
+            backgroundColor: ConstantString.lightBlue,
+          );
         } else if (state is AuthAuthenticated) {
           // Navigate to dashboard on successful login
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          Navigator.pushReplacementNamed(context, '/dashboard');
+          SuccessSnackBar.show(
+            context: context,
+            message: 'Login successful!',
+            backgroundColor: ConstantString.green,
+          );
+          Future.delayed(const Duration(seconds: 3), () {
+            _navigate();
+          });
         } else if (state is AuthError) {
-          // Show error message
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          ErrorSnackBar.show(
+            context: context,
+            message: state.message,
+            backgroundColor: ConstantString.red,
+          );
         }
       },
       child: Scaffold(
@@ -77,154 +91,174 @@ class LoginScreenState extends State<LoginScreen> {
             ),
           ),
           child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                children: [
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton(
-                      padding: const EdgeInsets.only(top: 25.0),
-                      icon: Icon(
-                        Icons.help_outline,
-                        color: Colors.white,
-                        size: 35,
-                      ),
-                      onPressed: () {},
-                    ),
-                  ),
-                  Spacer(),
-                  Text(
-                    ConstantString.appName,
-                    style: TextStyle(
-                      fontSize: 110,
-                      fontWeight: FontWeight.bold,
-                      color: ConstantString.white,
-                      fontFamily: ConstantString.fontFredokaOne,
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(maxPinLength, (index) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                        child: Container(
-                          width: 15,
-                          height: 15,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color:
-                                index < enteredPin.length
-                                    ? ConstantString.white
-                                    : ConstantString.white.withAlpha(88),
+            child: SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight:
+                      MediaQuery.of(context).size.height -
+                      MediaQuery.of(context).padding.top -
+                      MediaQuery.of(context).padding.bottom,
+                ),
+                child: IntrinsicHeight(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      children: [
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: IconButton(
+                            padding: const EdgeInsets.only(top: 25.0),
+                            icon: Icon(
+                              Icons.help_outline,
+                              color: Colors.white,
+                              size: 35,
+                            ),
+                            onPressed: () {},
                           ),
                         ),
-                      );
-                    }),
-                  ),
-                  SizedBox(height: 30),
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: ConstantString.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: TextField(
-                        controller: emailController,
-                        style: TextStyle(
-                          color: ConstantString.white,
-                          fontSize: 18,
-                          fontFamily: ConstantString.fontFredoka,
-                        ),
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: ConstantString.email,
-                          hintStyle: TextStyle(
-                            color: ConstantString.white.withOpacity(0.7),
-                            fontSize: 18,
-                            fontFamily: ConstantString.fontFredoka,
-                          ),
-                          prefixIcon: Icon(
-                            Icons.email_outlined,
-                            color: ConstantString.white,
-                          ),
-                        ),
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 30),
-                  Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildKey("1"),
-                          SizedBox(width: 15),
-                          _buildKey("2"),
-                          SizedBox(width: 15),
-                          _buildKey("3"),
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildKey("4"),
-                          SizedBox(width: 15),
-                          _buildKey("5"),
-                          SizedBox(width: 15),
-                          _buildKey("6"),
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildKey("7"),
-                          SizedBox(width: 15),
-                          _buildKey("8"),
-                          SizedBox(width: 15),
-                          _buildKey("9"),
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildKey("OK", isOk: true),
-                          SizedBox(width: 15),
-                          _buildKey("0"),
-                          SizedBox(width: 15),
-                          _buildKey("CE", isClear: true),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 70),
-                    child: Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/register');
-                        },
-                        child: Text(
-                          "Didn't have an account?",
+                        SizedBox(height: 30),
+                        Text(
+                          ConstantString.appName,
                           style: TextStyle(
-                            color: ConstantString.white,
-                            fontSize: 20,
+                            fontSize: 110,
                             fontWeight: FontWeight.bold,
-                            fontFamily: ConstantString.fontFredoka,
+                            color: ConstantString.white,
+                            fontFamily: ConstantString.fontFredokaOne,
                           ),
                         ),
-                      ),
+                        SizedBox(height: 20),
+                        Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: ConstantString.white.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                            ),
+                            child: TextField(
+                              controller: emailController,
+                              style: TextStyle(
+                                color: ConstantString.white,
+                                fontSize: 18,
+                                fontFamily: ConstantString.fontFredoka,
+                              ),
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: ConstantString.email,
+                                hintStyle: TextStyle(
+                                  color: ConstantString.white.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                  fontSize: 18,
+                                  fontFamily: ConstantString.fontFredoka,
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.email_outlined,
+                                  color: ConstantString.white,
+                                ),
+                              ),
+                              keyboardType: TextInputType.emailAddress,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 30),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(maxPinLength, (index) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5.0,
+                              ),
+                              child: Container(
+                                width: 15,
+                                height: 15,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color:
+                                      index < enteredPin.length
+                                          ? ConstantString.white
+                                          : ConstantString.white.withAlpha(88),
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                        SizedBox(height: 30),
+                        Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildKey("1"),
+                                SizedBox(width: 15),
+                                _buildKey("2"),
+                                SizedBox(width: 15),
+                                _buildKey("3"),
+                              ],
+                            ),
+                            SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildKey("4"),
+                                SizedBox(width: 15),
+                                _buildKey("5"),
+                                SizedBox(width: 15),
+                                _buildKey("6"),
+                              ],
+                            ),
+                            SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildKey("7"),
+                                SizedBox(width: 15),
+                                _buildKey("8"),
+                                SizedBox(width: 15),
+                                _buildKey("9"),
+                              ],
+                            ),
+                            SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildKey("OK", isOk: true),
+                                SizedBox(width: 15),
+                                _buildKey("0"),
+                                SizedBox(width: 15),
+                                _buildKey("CE", isClear: true),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 70),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.pushNamed(context, '/register');
+                                },
+                                child: Text(
+                                  "Didn't have an account?",
+                                  style: TextStyle(
+                                    color: ConstantString.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: ConstantString.fontFredoka,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           ),

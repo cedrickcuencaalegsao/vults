@@ -5,8 +5,7 @@ import 'package:vults/model/transaction_model.dart';
 class TransactionModal extends StatelessWidget {
   final Transaction transaction;
 
-  const TransactionModal({Key? key, required this.transaction})
-    : super(key: key);
+  const TransactionModal({super.key, required this.transaction});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +28,7 @@ class TransactionModal extends StatelessWidget {
                     color: ConstantString.darkBlue,
                   ),
                 ),
-                Container(
+                SizedBox(
                   width: 28,
                   height: 28,
                   child: IconButton(

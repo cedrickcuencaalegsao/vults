@@ -69,8 +69,8 @@ class NotificationScreenState extends State<NotificationScreen> {
     BuildContext context, {
     required NotificationModel notification,
   }) {
-    bool isAlert = notification.type == NotificationType.security.toString();
-    bool isUpdate = notification.type == NotificationType.system.toString();
+    bool isAlert = notification.type == NotificationType.security;
+    bool isUpdate = notification.type == NotificationType.system;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -84,10 +84,10 @@ class NotificationScreenState extends State<NotificationScreen> {
           decoration: BoxDecoration(
             color:
                 isAlert
-                    ? ConstantString.red.withOpacity(0.2)
+                    ? ConstantString.red.withValues(alpha: 0.2)
                     : isUpdate
-                    ? ConstantString.green.withOpacity(0.2)
-                    : ConstantString.lightBlue.withOpacity(0.2),
+                    ? ConstantString.green.withValues(alpha: 0.2)
+                    : ConstantString.lightBlue.withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
           child: Icon(

@@ -141,7 +141,7 @@ class SettingsScreenState extends State<SettingsScreen> {
             ),
             subtitle: Text(
               settings.email,
-              style: TextStyle(color: ConstantString.darkBlue.withOpacity(0.7)),
+              style: TextStyle(color: ConstantString.darkBlue.withValues(alpha:  0.7)),
             ),
             trailing: Container(
               padding: const EdgeInsets.all(8),

@@ -15,42 +15,33 @@ class TransactionService {
 
   Future<void> processTransaction(AccountTransaction transaction) async {
     try {
-      print('=============== TRANSACTION DEBUG ===============');
 
-      // Convert account type to match Firestore field name
       String accountType =
           transaction.accountType.toString().split('.').last.toLowerCase();
       if (accountType == 'fixdeposit') {
-        accountType = 'fixed_deposit'; // Match the Firestore field name
+        accountType = 'fixed_deposit';
       }
-      print('Processing transaction for account type: $accountType');
 
-      // Normalize the input account number
       final normalizedInputAccount = _normalizeAccountNumber(
         transaction.toAccount,
       );
-      print('Looking for normalized account number: $normalizedInputAccount');
 
       final querySnapshot = await _firestore.collection('users').get();
 
-      // Find user with matching account number
       String? recipientUserId;
       for (var doc in querySnapshot.docs) {
         final userAccounts = List<Map<String, dynamic>>.from(
           doc.data()['userAccounts'] ?? [],
         );
-        print('Checking user ${doc.id}');
 
         for (var account in userAccounts) {
           // Normalize the stored account number for comparison
           final storedAccount = _normalizeAccountNumber(
             account['account_id'].toString(),
           );
-          print('Comparing with normalized account_id: $storedAccount');
 
           if (storedAccount == normalizedInputAccount) {
             recipientUserId = doc.id;
-            print('Found matching account! Recipient ID: $recipientUserId');
             break;
           }
         }
@@ -58,11 +49,8 @@ class TransactionService {
       }
 
       if (recipientUserId == null) {
-        print('No matching account found!');
         throw Exception('Invalid account number');
       }
-      print('===============================================');
-
       // Get sender and recipient references
       final senderRef = _firestore
           .collection('users')
@@ -80,20 +68,15 @@ class TransactionService {
 
       bool senderUpdated = false;
       for (var i = 0; i < senderAccounts.length; i++) {
-        print('Checking sender account: ${senderAccounts[i]}');
         if (senderAccounts[i].containsKey(accountType)) {
           double currentBalance = senderAccounts[i][accountType].toDouble();
           senderAccounts[i][accountType] = currentBalance - transaction.amount;
           senderUpdated = true;
-          print('Updated sender balance for $accountType');
           break;
         }
       }
 
       if (!senderUpdated) {
-        print(
-          'ERROR: Sender account type $accountType not found in accounts: $senderAccounts',
-        );
         throw Exception('Sender account type not found');
       }
 
@@ -168,9 +151,7 @@ class TransactionService {
 
       // Commit all changes in one batch
       await batch.commit();
-      print('Transaction completed successfully');
     } catch (e) {
-      print('Transaction error: $e');
       throw Exception(e.toString());
     }
   }
