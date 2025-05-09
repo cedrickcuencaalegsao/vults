@@ -7,6 +7,7 @@ import 'package:vults/views/widgets/mobile/recent_transcation_card.dart';
 import 'package:vults/core/service/service.dart';
 import 'package:vults/model/user_model.dart';
 import 'package:intl/intl.dart';
+import 'package:vults/model/transaction_model.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -22,22 +23,35 @@ class DashboardScreenState extends State<DashboardScreen> {
   );
   int _currentPage = 0;
   User? currentuser;
+  Map<String, double>? _cashFlow;
+  Map<String, dynamic>? _statistics;
+  List<Transaction>? _recentTransactions;
   final _authService = AuthService();
 
   @override
   void initState() {
     super.initState();
     _pageController.addListener(_pageListener);
-    _fetUserData();
+    _fetchData();
   }
 
-  void _fetUserData() async {
+  // Add this method to fetch all required data
+  Future<void> _fetchData() async {
     try {
-      currentuser = await _authService.getCurrentUser();
-      debugPrint("Current User ID: ${currentuser?.userAccounts}");
-      setState(() {});
+      final user = await _authService.getCurrentUser();
+      final cashFlow = await _authService.getCashInAndCashOut();
+      final stats = await _authService.getStatistics();
+      final recentTx = await _authService.getRecentTransactions();
+      
+
+      setState(() {
+        currentuser = user;
+        _cashFlow = cashFlow;
+        _statistics = stats;
+        _recentTransactions = recentTx;
+      });
     } catch (e) {
-      print(e);
+      debugPrint('Error fetching data: $e');
     }
   }
 
@@ -86,16 +100,19 @@ class DashboardScreenState extends State<DashboardScreen> {
             final accountId = map['account_id'].toString();
             map.remove('account_id'); // Now only one key like 'savings', etc.
             final accountType = map.keys.first;
-            final balance = map[accountType].toString();
+            final balance = NumberFormat(
+              '#,##0.00',
+            ).format(double.parse(map[accountType].toString()));
 
             return {
-              'type': accountType == 'fixed_deposit'
-                  ? 'Fixed Deposit'
-                  : accountType == 'savings'
+              'type':
+                  accountType == 'fixed_deposit'
+                      ? 'Fixed Deposit'
+                      : accountType == 'savings'
                       ? 'Savings'
                       : accountType == 'business'
-                          ? 'Business'
-                          : 'Checking',
+                      ? 'Business'
+                      : 'Checking',
               'balance': balance,
               'number': accountId,
             };
@@ -280,7 +297,9 @@ class DashboardScreenState extends State<DashboardScreen> {
                       height: screenHeight * 0.075,
                       widget: screenWidth * 0.39,
                       title: 'Cash In',
-                      amount: '10000',
+                      amount: NumberFormat(
+                        '#,##0.00',
+                      ).format(_cashFlow?['cashIn'] ?? 0),
                       amountColor: ConstantString.green,
                     ),
                     DashboardCards(
@@ -288,7 +307,9 @@ class DashboardScreenState extends State<DashboardScreen> {
                       height: screenHeight * 0.075,
                       widget: screenWidth * 0.39,
                       title: 'Cash Out',
-                      amount: '1000.00',
+                      amount: NumberFormat(
+                        '#,##0.00',
+                      ).format(_cashFlow?['cashOut'] ?? 0),
                       amountColor: ConstantString.red,
                     ),
                   ],
@@ -300,6 +321,22 @@ class DashboardScreenState extends State<DashboardScreen> {
                   title: "Statistics",
                   amount: null,
                   amountColor: null,
+                  statistics:
+                      _statistics != null
+                          ? {
+                            'totalTransactions':
+                                _statistics!['totalTransactions'],
+                            'totalAmount': _statistics!['totalAmount'],
+                            'transactionsByStatus': {
+                              'completed':
+                                  _statistics!['transactionsByStatus']['completed'],
+                              'pending':
+                                  _statistics!['transactionsByStatus']['pending'],
+                              'failed':
+                                  _statistics!['transactionsByStatus']['failed'],
+                            },
+                          }
+                          : null,
                 ),
               ],
             ),
@@ -331,52 +368,61 @@ class DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             // SizedBox(height: screenWidth * 0.03),
+            // Replace the existing recent transactions section with:
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  RecentTranscationCard(
-                    padding: screenHeight * 0.01,
-                    height: screenHeight * 0.09,
-                    widget: screenWidth * 0.85,
-                    title: "Sent",
-                    amount: "123",
-                    amountColor: ConstantString.red,
-                    date: "March 12, 2023",
-                    cardIcon: Icons.arrow_upward_rounded,
-                  ),
-                  RecentTranscationCard(
-                    padding: screenHeight * 0.01,
-                    height: screenHeight * 0.09,
-                    widget: screenWidth * 0.85,
-                    title: "Cash Out",
-                    amount: "1000000",
-                    amountColor: ConstantString.red,
-                    date: "March 12, 2023",
-                    cardIcon: Icons.arrow_upward_rounded,
-                  ),
-                  RecentTranscationCard(
-                    padding: screenHeight * 0.01,
-                    height: screenHeight * 0.09,
-                    widget: screenWidth * 0.85,
-                    title: "Received",
-                    amount: "123123",
-                    amountColor: ConstantString.green,
-                    date: "March 12, 2023",
-                    cardIcon: Icons.arrow_downward_rounded,
-                  ),
-                  RecentTranscationCard(
-                    padding: screenHeight * 0.01,
-                    height: screenHeight * 0.09,
-                    widget: screenWidth * 0.85,
-                    title: "Cash In",
-                    amount: "123123",
-                    amountColor: ConstantString.green,
-                    date: "March 12, 2023",
-                    cardIcon: Icons.arrow_downward_rounded,
-                  ),
-                ],
+                children:
+                    _recentTransactions == null
+                        ? [
+                          // Loading state
+                          const Center(child: CircularProgressIndicator()),
+                        ]
+                        : _recentTransactions!.isEmpty
+                        ? [
+                          // Empty state
+                          Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(20),
+                              child: Text(
+                                'No recent transactions',
+                                style: TextStyle(
+                                  color: ConstantString.grey,
+                                  fontSize: 16,
+                                  fontFamily: ConstantString.fontFredoka,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ]
+                        : _recentTransactions!
+                            .map(
+                              (tx) => RecentTranscationCard(
+                                padding: screenHeight * 0.01,
+                                height: screenHeight * 0.09,
+                                widget: screenWidth * 0.85,
+                                title:
+                                    tx.type == TransactionType.send
+                                        ? "Sent"
+                                        : "Received",
+                                amount: NumberFormat(
+                                  '#,##0.00',
+                                ).format(tx.amount),
+                                amountColor:
+                                    tx.type == TransactionType.send
+                                        ? ConstantString.red
+                                        : ConstantString.green,
+                                date: DateFormat(
+                                  'MMMM dd, yyyy',
+                                ).format(tx.timestamp),
+                                cardIcon:
+                                    tx.type == TransactionType.send
+                                        ? Icons.arrow_upward_rounded
+                                        : Icons.arrow_downward_rounded,
+                              ),
+                            )
+                            .toList(),
               ),
             ),
             SizedBox(height: screenWidth * 0.05),
