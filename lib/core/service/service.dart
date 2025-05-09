@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:vults/model/device_info_plus.dart';
 import 'package:vults/model/user_model.dart' as model;
 
 class AuthService {
@@ -50,6 +51,25 @@ class AuthService {
     return newUser;
   }
 
+  // Add new method for device tracking
+  Future<void> trackDevice(String userId) async {
+    try {
+      final deviceInfo = await PlatformService.getDeviceInfo();
+
+      await _firestore.collection('devices').add({
+        'userId': userId,
+        'name': deviceInfo['name'],
+        'type': deviceInfo['type'],
+        'status': 'active',
+        'lastActive': FieldValue.serverTimestamp(),
+        'deviceInfo': deviceInfo['deviceInfo'],
+      });
+    } catch (e) {
+      // Silent fail - don't disrupt main auth flow
+      print('Device tracking failed: $e');
+    }
+  }
+
   Future<model.User?> login({
     required String email,
     required String pin,
@@ -64,7 +84,14 @@ class AuthService {
           await _firestore.collection('users').doc(uid).get();
 
       if (userDoc.exists) {
-        return model.User.fromJson(userDoc.data() as Map<String, dynamic>);
+        final userData = userDoc.data() as Map<String, dynamic>;
+        // Ensure the id is not null by adding it to userData
+        userData['id'] = uid;
+
+        final user = model.User.fromJson(userData);
+        // Track device using the non-null uid
+        await trackDevice(uid);
+        return user;
       }
 
       return null;

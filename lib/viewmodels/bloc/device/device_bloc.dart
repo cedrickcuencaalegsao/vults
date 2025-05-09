@@ -1,4 +1,6 @@
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import '../../../model/device_model.dart';
 
@@ -6,109 +8,55 @@ part 'device_event.dart';
 part 'device_state.dart';
 
 class DeviceBloc extends Bloc<DeviceEvent, DeviceState> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   DeviceBloc() : super(DeviceInitial()) {
     on<LoadDevicesRequested>(_onLoadDevicesRequested);
-    on<AddDeviceRequested>(_onAddDeviceRequested);
-    on<RemoveDeviceRequested>(_onRemoveDeviceRequested);
     on<UpdateDeviceStatusRequested>(_onUpdateDeviceStatusRequested);
-    on<BlockDeviceRequested>(_onBlockDeviceRequested);
-    on<UnblockDeviceRequested>(_onUnblockDeviceRequested);
   }
 
-  void _onLoadDevicesRequested(
+  Future<void> _onLoadDevicesRequested(
     LoadDevicesRequested event,
     Emitter<DeviceState> emit,
   ) async {
-    emit(DeviceLoading());
     try {
-      // Here you would typically load devices from your storage service
-      await Future.delayed(const Duration(milliseconds: 500));
-      final devices = [
-        DeviceModel(
-          id: '1',
-          name: 'iPhone 12',
-          type: DeviceType.mobile,
-          status: DeviceStatus.active,
-          platform: 'iOS',
-          lastIp: '192.168.1.1',
-          lastActive: DateTime.now(),
-        ),
-        DeviceModel(
-          id: '2',
-          name: 'MacBook Pro',
-          type: DeviceType.desktop,
-          status: DeviceStatus.active,
-          platform: 'macOS',
-          lastIp: '192.168.1.2',
-          lastActive: DateTime.now(),
-        ),
-      ];
+      emit(DeviceLoading());
+
+      final user = _auth.currentUser;
+      if (user == null) {
+        emit(const DeviceError('User not authenticated'));
+        return;
+      }
+
+      final devicesSnapshot =
+          await _firestore
+              .collection('devices')
+              .where('userId', isEqualTo: user.uid)
+              .get();
+
+      final devices =
+          devicesSnapshot.docs
+              .map((doc) => DeviceModel.fromJson({'id': doc.id, ...doc.data()}))
+              .toList();
+
       emit(DevicesLoaded(devices));
     } catch (e) {
       emit(DeviceError(e.toString()));
     }
   }
 
-  void _onAddDeviceRequested(
-    AddDeviceRequested event,
-    Emitter<DeviceState> emit,
-  ) async {
-    try {
-      // Here you would typically add the device to your storage service
-      await Future.delayed(const Duration(milliseconds: 500));
-      emit(DeviceAdded(event.device));
-    } catch (e) {
-      emit(DeviceError(e.toString()));
-    }
-  }
-
-  void _onRemoveDeviceRequested(
-    RemoveDeviceRequested event,
-    Emitter<DeviceState> emit,
-  ) async {
-    try {
-      // Here you would typically remove the device from your storage service
-      await Future.delayed(const Duration(milliseconds: 500));
-      emit(DeviceRemoved(event.deviceId));
-    } catch (e) {
-      emit(DeviceError(e.toString()));
-    }
-  }
-
-  void _onUpdateDeviceStatusRequested(
+  Future<void> _onUpdateDeviceStatusRequested(
     UpdateDeviceStatusRequested event,
     Emitter<DeviceState> emit,
   ) async {
     try {
-      // Here you would typically update the device status in your storage service
-      await Future.delayed(const Duration(milliseconds: 500));
-      emit(DeviceStatusUpdated(deviceId: event.deviceId, status: event.status));
-    } catch (e) {
-      emit(DeviceError(e.toString()));
-    }
-  }
+      await _firestore.collection('devices').doc(event.deviceId).update({
+        'status': event.status.toString().split('.').last,
+        'lastActive': FieldValue.serverTimestamp(),
+      });
 
-  void _onBlockDeviceRequested(
-    BlockDeviceRequested event,
-    Emitter<DeviceState> emit,
-  ) async {
-    try {
-      // Here you would typically block the device in your storage service
-      await Future.delayed(const Duration(milliseconds: 500));
-      emit(DeviceBlocked(event.deviceId));
-    } catch (e) {
-      emit(DeviceError(e.toString()));
-    }
-  }
-
-  void _onUnblockDeviceRequested(
-    UnblockDeviceRequested event,
-    Emitter<DeviceState> emit,
-  ) async {
-    try {
-      // Here you would typically unblock the device in your storage service
-      await Future.delayed(const Duration(milliseconds: 500));
-      emit(DeviceUnblocked(event.deviceId));
+      add(LoadDevicesRequested()); // Reload devices after update
     } catch (e) {
       emit(DeviceError(e.toString()));
     }

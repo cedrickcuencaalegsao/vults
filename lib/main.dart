@@ -5,6 +5,7 @@ import 'package:vults/core/constants/constant_string.dart';
 import 'package:vults/viewmodels/bloc/account_settings/account_settings_bloc.dart';
 import 'package:vults/viewmodels/bloc/auth/auth_bloc.dart';
 import 'package:vults/viewmodels/bloc/settings/settings_bloc.dart';
+import 'package:vults/viewmodels/bloc/device/device_bloc.dart';
 // Mobile Views.
 import 'package:vults/views/screens/mobile/register_screen.dart' as mobile;
 import 'package:vults/views/screens/mobile/sendmoney_screen.dart' as mobile;
@@ -45,6 +46,7 @@ void main() async {
         BlocProvider(
           create: (context) => AccountSettingsBloc(),
         ), // Added this line
+        BlocProvider(create: (context) => DeviceBloc()),
       ],
       child: const MainApp(),
     ),
@@ -92,7 +94,11 @@ class MobileRoutes {
             child: const mobile.AccountSettingsScreen(),
           ),
 
-      '/devices': (BuildContext context) => const mobile.DevicesScreen(),
+      '/devices':
+          (BuildContext context) => BlocProvider.value(
+            value: BlocProvider.of<DeviceBloc>(context),
+            child: const mobile.DevicesScreen(),
+          ),
       '/notificationsetting':
           (BuildContext context) => const mobile.NotificationSettingScreen(),
     };
