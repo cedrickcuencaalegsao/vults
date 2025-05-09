@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vults/core/constants/constant_string.dart';
-import 'package:vults/viewmodels/bloc/account_settings/account_settings_bloc.dart';
+
+// Bloc.
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vults/viewmodels/bloc/auth/auth_bloc.dart';
 import 'package:vults/viewmodels/bloc/settings/settings_bloc.dart';
+import 'package:vults/viewmodels/bloc/transaction/transaction_bloc.dart';
+import 'package:vults/viewmodels/bloc/account_settings/account_settings_bloc.dart';
 import 'package:vults/viewmodels/bloc/device/device_bloc.dart';
 // Mobile Views.
 import 'package:vults/views/screens/mobile/register_screen.dart' as mobile;
@@ -45,6 +48,10 @@ void main() async {
         BlocProvider(create: (context) => SettingsBloc()),
         BlocProvider(
           create: (context) => AccountSettingsBloc(),
+        ),
+        BlocProvider(
+          create: (context) => TransactionBloc(),
+        ),
         ), // Added this line
         BlocProvider(create: (context) => DeviceBloc()),
       ],
@@ -78,7 +85,12 @@ class MobileRoutes {
           (BuildContext context) => const mobile.SendmoneyFirstScreen(),
       '/scanqr': (BuildContext context) => const mobile.ScanScreen(),
       '/transaction':
-          (BuildContext context) => const mobile.TransactionScreen(),
+          (BuildContext context) => BlocProvider(
+            create: (context) => TransactionBloc(),
+            child: const mobile.TransactionScreen(),
+          ),
+      // '/transaction':
+      //     (BuildContext context) => const mobile.TransactionScreen(),
       '/notification':
           (BuildContext context) => const mobile.NotificationScreen(),
       '/settings':
