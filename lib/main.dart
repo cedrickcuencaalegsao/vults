@@ -46,13 +46,8 @@ void main() async {
       providers: [
         BlocProvider(create: (context) => AuthBloc()),
         BlocProvider(create: (context) => SettingsBloc()),
-        BlocProvider(
-          create: (context) => AccountSettingsBloc(),
-        ),
-        BlocProvider(
-          create: (context) => TransactionBloc(),
-        ),
-        ), // Added this line
+        BlocProvider(create: (context) => AccountSettingsBloc(),),
+        BlocProvider(create: (context) => TransactionBloc(),),
         BlocProvider(create: (context) => DeviceBloc()),
       ],
       child: const MainApp(),
