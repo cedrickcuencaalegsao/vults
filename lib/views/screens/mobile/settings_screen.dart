@@ -62,30 +62,43 @@ class SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SettingsBloc, SettingsState>(
-      builder: (context, state) {
-        return Scaffold(
-          backgroundColor: ConstantString.lightGrey,
-          appBar: const CustomAppBar(
-            title: 'Settings',
-            iconColor: ConstantString.darkBlue,
-            fontColor: ConstantString.darkBlue,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            fontFamily: ConstantString.fontFredokaOne,
-          ),
-          body: SafeArea(
-            child:
-                state is SettingsLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : state is SettingsLoaded
-                    ? _buildSettingsContent(context, state.settings)
-                    : const Center(
-                      child: Text('Error loading settings'),
-                    ), // Fixed: removed 'text:' parameter
-          ),
-        );
+    return BlocListener<SettingsBloc, SettingsState>(
+      listener: (context, state) {
+        if (state is SettingsSignedOut) {
+          Navigator.of(
+            context,
+          ).pushNamedAndRemoveUntil('/login', (route) => false);
+        } else if (state is SettingsError) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
+        }
       },
+      child: BlocBuilder<SettingsBloc, SettingsState>(
+        builder: (context, state) {
+          return Scaffold(
+            backgroundColor: ConstantString.lightGrey,
+            appBar: const CustomAppBar(
+              title: 'Settings',
+              iconColor: ConstantString.darkBlue,
+              fontColor: ConstantString.darkBlue,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              fontFamily: ConstantString.fontFredokaOne,
+            ),
+            body: SafeArea(
+              child:
+                  state is SettingsLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : state is SettingsLoaded
+                      ? _buildSettingsContent(context, state.settings)
+                      : const Center(
+                        child: Text('Error loading settings'),
+                      ), // Fixed: removed 'text:' parameter
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -120,14 +133,14 @@ class SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             title: Text(
-              "Firstname Lastname", // TODO: Get from UserBloc
+              "${settings.firstName} ${settings.lastName}",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: ConstantString.darkBlue,
               ),
             ),
             subtitle: Text(
-              "example@email.com", // TODO: Get from UserBloc
+              settings.email,
               style: TextStyle(color: ConstantString.darkBlue.withOpacity(0.7)),
             ),
             trailing: Container(
@@ -192,10 +205,8 @@ class SettingsScreenState extends State<SettingsScreen> {
           Center(
             child: ElevatedButton(
               onPressed: () {
-                // TODO: Implement sign out logic with AuthBloc
-                Navigator.of(
-                  context,
-                ).pushNamedAndRemoveUntil('/login', (route) => false);
+                // Add event to bloc
+                BlocProvider.of<SettingsBloc>(context).add(SignOutRequested());
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: ConstantString.darkBlue,

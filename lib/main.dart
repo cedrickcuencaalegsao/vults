@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vults/core/constants/constant_string.dart';
+import 'package:vults/viewmodels/bloc/account_settings/account_settings_bloc.dart';
 import 'package:vults/viewmodels/bloc/auth/auth_bloc.dart';
+import 'package:vults/viewmodels/bloc/settings/settings_bloc.dart';
 // Mobile Views.
 import 'package:vults/views/screens/mobile/register_screen.dart' as mobile;
 import 'package:vults/views/screens/mobile/sendmoney_screen.dart' as mobile;
@@ -35,10 +37,15 @@ import './firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // runApp(const MainApp());
   runApp(
-    BlocProvider(
-      create: (context) => AuthBloc(),
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => AuthBloc()),
+        BlocProvider(create: (context) => SettingsBloc()),
+        BlocProvider(
+          create: (context) => AccountSettingsBloc(),
+        ), // Added this line
+      ],
       child: const MainApp(),
     ),
   );
@@ -72,11 +79,18 @@ class MobileRoutes {
           (BuildContext context) => const mobile.TransactionScreen(),
       '/notification':
           (BuildContext context) => const mobile.NotificationScreen(),
-      '/settings': (BuildContext context) => const mobile.SettingsScreen(),
+      '/settings':
+          (BuildContext context) => BlocProvider.value(
+            value: BlocProvider.of<SettingsBloc>(context),
+            child: const mobile.SettingsScreen(),
+          ),
       '/downloadpdf':
           (BuildContext context) => const mobile.DownloadPdfScreen(),
       '/accountsettings':
-          (BuildContext context) => const mobile.AccountSettingsScreen(),
+          (context) => BlocProvider(
+            create: (context) => AccountSettingsBloc(),
+            child: const mobile.AccountSettingsScreen(),
+          ),
 
       '/devices': (BuildContext context) => const mobile.DevicesScreen(),
       '/notificationsetting':
