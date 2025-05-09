@@ -37,7 +37,7 @@ class Transaction {
       }
       return DateTime.now();
     }
-    
+
     return Transaction(
       id: json['id'] as String,
       senderId: (json['senderId'] ?? json['fromAccountId'] ?? '') as String,
@@ -46,9 +46,11 @@ class Transaction {
       timestamp: parseTimestamp(json['timestamp']),
       type: TransactionType.values.firstWhere(
         (e) => e.toString() == 'TransactionType.${json['type']}',
-        orElse: () => json['fromAccountId'] != null
-            ? TransactionType.send
-            : TransactionType.receive,
+        orElse:
+            () =>
+                json['fromAccountId'] != null
+                    ? TransactionType.send
+                    : TransactionType.receive,
       ),
       status: TransactionStatus.values.firstWhere(
         (e) => e.toString() == 'TransactionStatus.${json['status']}',
@@ -72,7 +74,7 @@ class Transaction {
   }
 
   String get formattedAmount {
-    final formatter = NumberFormat.currency(symbol: '\$');
+    final formatter = NumberFormat.currency(symbol: '₱');
     return formatter.format(amount);
   }
 

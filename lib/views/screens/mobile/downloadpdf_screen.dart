@@ -16,7 +16,7 @@ class DownloadPdfScreenState extends State<DownloadPdfScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: "Download PDF",
+        title: "Download Transaction",
         iconColor: ConstantString.darkBlue,
         fontColor: ConstantString.darkBlue,
         fontSize: 24,
