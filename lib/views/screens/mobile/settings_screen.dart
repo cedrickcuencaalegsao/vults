@@ -181,7 +181,7 @@ class SettingsScreenState extends State<SettingsScreen> {
           _buildSettingItem(
             icon: Icons.picture_as_pdf,
             iconColor: ConstantString.green,
-            title: "Download PDF",
+            title: "Download Transaction",
             onTap: () {
               Navigator.push(
                 context,
