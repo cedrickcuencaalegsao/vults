@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:vults/core/constants/constant_string.dart';
 import 'package:vults/views/widgets/web/guestappbar.dart';
 
@@ -13,7 +12,7 @@ class LandingScreen extends StatefulWidget {
 class LandingScreenState extends State<LandingScreen> {
   // Scroll controller
   final ScrollController _scrollController = ScrollController();
-  
+
   // Form controllers and keys
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -21,23 +20,23 @@ class LandingScreenState extends State<LandingScreen> {
   final TextEditingController _messageController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isFormSubmitting = false;
-  
+
   // Section keys
   final GlobalKey _homeKey = GlobalKey();
   final GlobalKey _featuresKey = GlobalKey();
   final GlobalKey _aboutKey = GlobalKey();
   final GlobalKey _contactKey = GlobalKey();
-  
+
   // Active section index
   int _activeIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    
+
     // Add listener to update the active section based on scroll position
     _scrollController.addListener(_updateActiveSection);
-    
+
     // Initialize with a small delay to ensure all widgets are laid out
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateActiveSection();
@@ -48,23 +47,23 @@ class LandingScreenState extends State<LandingScreen> {
   void dispose() {
     _scrollController.removeListener(_updateActiveSection);
     _scrollController.dispose();
-    
+
     // Dispose of form controllers
     _nameController.dispose();
     _emailController.dispose();
     _subjectController.dispose();
     _messageController.dispose();
-    
+
     super.dispose();
   }
-  
+
   // Update the active section based on scroll position with improved thresholds
   void _updateActiveSection() {
     if (!_scrollController.hasClients) return;
-    
+
     final double scrollPosition = _scrollController.position.pixels;
     final double screenHeight = MediaQuery.of(context).size.height;
-    
+
     // Calculate the index based on relative scroll position with adjusted thresholds
     if (scrollPosition < screenHeight * 0.6) {
       setState(() => _activeIndex = 0); // Home
@@ -76,34 +75,34 @@ class LandingScreenState extends State<LandingScreen> {
       setState(() => _activeIndex = 3); // Contact
     }
   }
-  
+
   // Scroll to section with fixed offsets
   void _scrollToSection(int index) {
     if (!_scrollController.hasClients) return;
-    
+
     setState(() => _activeIndex = index);
-    
+
     final double screenHeight = MediaQuery.of(context).size.height;
     double targetPosition;
-    
+
     // Use fixed positions for reliable navigation with adjusted spacing
     switch (index) {
       case 0: // Home
         targetPosition = 0;
         break;
       case 1: // Features
-        targetPosition = screenHeight * 1.0;  // Just below first screen
+        targetPosition = screenHeight * 1.0; // Just below first screen
         break;
       case 2: // About
-        targetPosition = screenHeight * 2.0;  // Below features
+        targetPosition = screenHeight * 2.0; // Below features
         break;
       case 3: // Contact
-        targetPosition = screenHeight * 3.0;  // Below about
+        targetPosition = screenHeight * 3.0; // Below about
         break;
       default:
         targetPosition = 0;
     }
-    
+
     _scrollController.animateTo(
       targetPosition,
       duration: const Duration(milliseconds: 800),
@@ -114,7 +113,7 @@ class LandingScreenState extends State<LandingScreen> {
   void _login(BuildContext context) {
     Navigator.pushNamed(context, '/login');
   }
-  
+
   void _register(BuildContext context) {
     Navigator.pushNamed(context, '/register');
   }
@@ -150,9 +149,10 @@ class LandingScreenState extends State<LandingScreen> {
           ),
         ),
         child: SafeArea(
-          child: isDesktop 
-              ? _buildDesktopLayout(screenWidth, screenHeight)
-              : _buildMobileLayout(screenWidth, screenHeight, isTablet),
+          child:
+              isDesktop
+                  ? _buildDesktopLayout(screenWidth, screenHeight)
+                  : _buildMobileLayout(screenWidth, screenHeight, isTablet),
         ),
       ),
     );
@@ -172,10 +172,7 @@ class LandingScreenState extends State<LandingScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  ConstantString.darkBlue,
-                  ConstantString.lightBlue,
-                ],
+                colors: [ConstantString.darkBlue, ConstantString.lightBlue],
               ),
             ),
             child: Stack(
@@ -188,7 +185,7 @@ class LandingScreenState extends State<LandingScreen> {
                     width: 300,
                     height: 300,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
+                      color: Colors.white.withValues(alpha: 0.05),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -200,7 +197,7 @@ class LandingScreenState extends State<LandingScreen> {
                     width: 400,
                     height: 400,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
+                      color: Colors.white.withValues(alpha: 0.05),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -235,7 +232,9 @@ class LandingScreenState extends State<LandingScreen> {
                                       fontFamily: ConstantString.fontFredokaOne,
                                     ),
                                   ),
-                                  TextSpan(text: " the\nbest mobile\nbank App."),
+                                  TextSpan(
+                                    text: " the\nbest mobile\nbank App.",
+                                  ),
                                 ],
                               ),
                             ),
@@ -271,11 +270,17 @@ class LandingScreenState extends State<LandingScreen> {
                             // Trust badges
                             Row(
                               children: [
-                                _buildTrustBadge(Icons.security_rounded, "Secure"),
+                                _buildTrustBadge(
+                                  Icons.security_rounded,
+                                  "Secure",
+                                ),
                                 const SizedBox(width: 40),
                                 _buildTrustBadge(Icons.speed_rounded, "Fast"),
                                 const SizedBox(width: 40),
-                                _buildTrustBadge(Icons.thumb_up_rounded, "Trusted"),
+                                _buildTrustBadge(
+                                  Icons.thumb_up_rounded,
+                                  "Trusted",
+                                ),
                               ],
                             ),
                           ],
@@ -283,18 +288,13 @@ class LandingScreenState extends State<LandingScreen> {
                       ),
                     ),
                     // Right side - App mockup
-                    Expanded(
-                      flex: 4,
-                      child: Center(
-                        child: _buildAppMockup(),
-                      ),
-                    ),
+                    Expanded(flex: 4, child: Center(child: _buildAppMockup())),
                   ],
                 ),
               ],
             ),
           ),
-          
+
           // Features Section with light background
           Container(
             key: _featuresKey,
@@ -304,7 +304,7 @@ class LandingScreenState extends State<LandingScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, -5),
                 ),
@@ -371,7 +371,7 @@ class LandingScreenState extends State<LandingScreen> {
               ],
             ),
           ),
-          
+
           // About Section with gradient background
           Container(
             key: _aboutKey,
@@ -383,7 +383,7 @@ class LandingScreenState extends State<LandingScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  ConstantString.lightBlue.withOpacity(0.9),
+                  ConstantString.lightBlue.withValues(alpha: 0.9),
                   ConstantString.darkBlue,
                 ],
               ),
@@ -432,7 +432,7 @@ class LandingScreenState extends State<LandingScreen> {
                               "Founded in 2023, Vult\$ was created with a simple goal: make banking accessible, affordable, and enjoyable for everyone. We believe financial services should be a right, not a privilege.\n\nOur team of experts from fintech and banking industries came together to build something truly revolutionary. Today, we serve over 1 million customers across the globe, with a satisfaction rate of 98%.",
                               style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withValues(alpha: 0.9),
                                 height: 1.6,
                               ),
                             ),
@@ -451,7 +451,7 @@ class LandingScreenState extends State<LandingScreen> {
                       child: Container(
                         height: 400,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         margin: const EdgeInsets.all(20),
@@ -490,7 +490,7 @@ class LandingScreenState extends State<LandingScreen> {
               ],
             ),
           ),
-          
+
           // Contact Section with light background
           Container(
             key: _contactKey,
@@ -527,9 +527,7 @@ class LandingScreenState extends State<LandingScreen> {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildContactForm(),
-                        ],
+                        children: [_buildContactForm()],
                       ),
                     ),
                     // Contact info
@@ -553,7 +551,10 @@ class LandingScreenState extends State<LandingScreen> {
                             const SizedBox(height: 20),
                             _buildContactInfo(Icons.phone, "+1 (555) 123-4567"),
                             const SizedBox(height: 20),
-                            _buildContactInfo(Icons.location_on, "123 Fintech St, San Francisco, CA 94105"),
+                            _buildContactInfo(
+                              Icons.location_on,
+                              "123 Fintech St, San Francisco, CA 94105",
+                            ),
                             const SizedBox(height: 40),
                             Text(
                               "Follow Us",
@@ -584,7 +585,7 @@ class LandingScreenState extends State<LandingScreen> {
               ],
             ),
           ),
-          
+
           // Footer
           Container(
             padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 80),
@@ -595,7 +596,7 @@ class LandingScreenState extends State<LandingScreen> {
                 Text(
                   "© 2023 Vult\$. All rights reserved.",
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 14,
                   ),
                 ),
@@ -606,7 +607,7 @@ class LandingScreenState extends State<LandingScreen> {
                       child: Text(
                         "Privacy Policy",
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 14,
                         ),
                       ),
@@ -617,7 +618,7 @@ class LandingScreenState extends State<LandingScreen> {
                       child: Text(
                         "Terms of Service",
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 14,
                         ),
                       ),
@@ -638,7 +639,7 @@ class LandingScreenState extends State<LandingScreen> {
       child: Column(
         children: [
           // Home Section
-          Container(
+          SizedBox(
             key: _homeKey,
             height: height,
             child: Stack(
@@ -651,7 +652,7 @@ class LandingScreenState extends State<LandingScreen> {
                     width: 200,
                     height: 200,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
+                      color: Colors.white.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -663,7 +664,7 @@ class LandingScreenState extends State<LandingScreen> {
                     width: 250,
                     height: 250,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
+                      color: Colors.white.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -753,7 +754,7 @@ class LandingScreenState extends State<LandingScreen> {
               ],
             ),
           ),
-          
+
           // Features Section
           Container(
             key: _featuresKey,
@@ -804,7 +805,7 @@ class LandingScreenState extends State<LandingScreen> {
               ],
             ),
           ),
-          
+
           // About Section
           Container(
             key: _aboutKey,
@@ -815,7 +816,10 @@ class LandingScreenState extends State<LandingScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topRight,
                 end: Alignment.bottomLeft,
-                colors: [ConstantString.lightBlue.withOpacity(0.9), ConstantString.darkBlue],
+                colors: [
+                  ConstantString.lightBlue.withValues(alpha: 0.9),
+                  ConstantString.darkBlue,
+                ],
               ),
             ),
             child: Column(
@@ -858,7 +862,7 @@ class LandingScreenState extends State<LandingScreen> {
                       "Founded in 2023, Vult\$ was created with a simple goal: make banking accessible, affordable, and enjoyable for everyone. We believe financial services should be a right, not a privilege.\n\nOur team of experts from fintech and banking industries came together to build something truly revolutionary. Today, we serve over 1 million customers across the globe, with a satisfaction rate of 98%.",
                       style: TextStyle(
                         fontSize: 15,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         height: 1.6,
                       ),
                     ),
@@ -877,7 +881,7 @@ class LandingScreenState extends State<LandingScreen> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Column(
@@ -913,7 +917,7 @@ class LandingScreenState extends State<LandingScreen> {
               ],
             ),
           ),
-          
+
           // Contact Section
           Container(
             key: _contactKey,
@@ -960,7 +964,10 @@ class LandingScreenState extends State<LandingScreen> {
                 const SizedBox(height: 16),
                 _buildContactInfo(Icons.phone, "+1 (555) 123-4567"),
                 const SizedBox(height: 16),
-                _buildContactInfo(Icons.location_on, "123 Fintech St, San Francisco, CA 94105"),
+                _buildContactInfo(
+                  Icons.location_on,
+                  "123 Fintech St, San Francisco, CA 94105",
+                ),
                 const SizedBox(height: 30),
                 Text(
                   "Follow Us",
@@ -986,7 +993,7 @@ class LandingScreenState extends State<LandingScreen> {
               ],
             ),
           ),
-          
+
           // Footer
           Container(
             padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 24),
@@ -996,7 +1003,7 @@ class LandingScreenState extends State<LandingScreen> {
                 Text(
                   "© 2023 Vult\$. All rights reserved.",
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 14,
                   ),
                 ),
@@ -1009,7 +1016,7 @@ class LandingScreenState extends State<LandingScreen> {
                       child: Text(
                         "Privacy Policy",
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 14,
                         ),
                       ),
@@ -1020,7 +1027,7 @@ class LandingScreenState extends State<LandingScreen> {
                       child: Text(
                         "Terms of Service",
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 14,
                         ),
                       ),
@@ -1035,7 +1042,12 @@ class LandingScreenState extends State<LandingScreen> {
     );
   }
 
-  Widget _buildGradientButton(String text, {required VoidCallback onTap, bool isPrimary = true, double? width}) {
+  Widget _buildGradientButton(
+    String text, {
+    required VoidCallback onTap,
+    bool isPrimary = true,
+    double? width,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(50),
@@ -1043,31 +1055,33 @@ class LandingScreenState extends State<LandingScreen> {
         width: width,
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
         decoration: BoxDecoration(
-          gradient: isPrimary
-              ? LinearGradient(
-                  colors: [
-                    ConstantString.orange, 
-                    ConstantString.orange.withRed(255)
-                  ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                )
-              : null,
+          gradient:
+              isPrimary
+                  ? LinearGradient(
+                    colors: [
+                      ConstantString.orange,
+                      ConstantString.orange.withRed(255),
+                    ],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  )
+                  : null,
           color: isPrimary ? null : Colors.transparent,
           borderRadius: BorderRadius.circular(50),
           border: Border.all(
             color: isPrimary ? Colors.transparent : ConstantString.white,
             width: isPrimary ? 0 : 2,
           ),
-          boxShadow: isPrimary
-              ? [
-                  BoxShadow(
-                    color: ConstantString.orange.withOpacity(0.5),
-                    offset: const Offset(0, 4),
-                    blurRadius: 20,
-                  )
-                ]
-              : null,
+          boxShadow:
+              isPrimary
+                  ? [
+                    BoxShadow(
+                      color: ConstantString.orange.withValues(alpha: 0.5),
+                      offset: const Offset(0, 4),
+                      blurRadius: 20,
+                    ),
+                  ]
+                  : null,
         ),
         child: Text(
           text,
@@ -1086,11 +1100,7 @@ class LandingScreenState extends State<LandingScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          icon,
-          color: ConstantString.white,
-          size: 20,
-        ),
+        Icon(icon, color: ConstantString.white, size: 20),
         const SizedBox(width: 8),
         Text(
           text,
@@ -1114,11 +1124,11 @@ class LandingScreenState extends State<LandingScreen> {
           height: 15,
           margin: const EdgeInsets.only(top: 600),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(100),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 blurRadius: 20,
                 spreadRadius: 5,
               ),
@@ -1134,7 +1144,7 @@ class LandingScreenState extends State<LandingScreen> {
             borderRadius: BorderRadius.circular(40),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.5),
+                color: Colors.black.withValues(alpha: 0.5),
                 blurRadius: 30,
                 offset: const Offset(0, 10),
               ),
@@ -1150,8 +1160,8 @@ class LandingScreenState extends State<LandingScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                ConstantString.darkBlue.withOpacity(0.9),
-                ConstantString.lightBlue.withOpacity(0.9),
+                ConstantString.darkBlue.withValues(alpha: 0.9),
+                ConstantString.lightBlue.withValues(alpha: 0.9),
               ],
             ),
             borderRadius: BorderRadius.circular(30),
@@ -1168,7 +1178,7 @@ class LandingScreenState extends State<LandingScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 10,
                       spreadRadius: 1,
                     ),
@@ -1199,11 +1209,11 @@ class LandingScreenState extends State<LandingScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 10,
                         spreadRadius: 0,
                         offset: const Offset(0, 5),
@@ -1216,7 +1226,7 @@ class LandingScreenState extends State<LandingScreen> {
                       Text(
                         "Balance",
                         style: TextStyle(
-                          color: ConstantString.white.withOpacity(0.7),
+                          color: ConstantString.white.withValues(alpha: 0.7),
                           fontSize: 16,
                         ),
                       ),
@@ -1233,14 +1243,23 @@ class LandingScreenState extends State<LandingScreen> {
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
                             decoration: BoxDecoration(
-                              color: ConstantString.green.withOpacity(0.2),
+                              color: ConstantString.green.withValues(
+                                alpha: 0.1,
+                              ),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Row(
                               children: const [
-                                Icon(Icons.arrow_upward, color: ConstantString.green, size: 12),
+                                Icon(
+                                  Icons.arrow_upward,
+                                  color: ConstantString.green,
+                                  size: 12,
+                                ),
                                 SizedBox(width: 2),
                                 Text(
                                   "2.4%",
@@ -1280,7 +1299,7 @@ class LandingScreenState extends State<LandingScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(15),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: Row(
@@ -1291,7 +1310,7 @@ class LandingScreenState extends State<LandingScreen> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: ConstantString.orange.withOpacity(0.2),
+                          color: ConstantString.orange.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -1317,7 +1336,9 @@ class LandingScreenState extends State<LandingScreen> {
                             Text(
                               "Today",
                               style: TextStyle(
-                                color: ConstantString.white.withOpacity(0.5),
+                                color: ConstantString.white.withValues(
+                                  alpha: 0.5,
+                                ),
                                 fontSize: 12,
                               ),
                             ),
@@ -1361,21 +1382,17 @@ class LandingScreenState extends State<LandingScreen> {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.5),
             blurRadius: 5,
             spreadRadius: 0,
           ),
         ],
       ),
-      child: Icon(
-        icon,
-        color: ConstantString.white,
-        size: 20,
-      ),
+      child: Icon(icon, color: ConstantString.white, size: 20),
     );
   }
 
@@ -1387,7 +1404,7 @@ class LandingScreenState extends State<LandingScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.5),
             offset: const Offset(0, 10),
             blurRadius: 30,
           ),
@@ -1399,14 +1416,10 @@ class LandingScreenState extends State<LandingScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: ConstantString.orange.withOpacity(0.1),
+              color: ConstantString.orange.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: ConstantString.orange,
-              size: 28,
-            ),
+            child: Icon(icon, color: ConstantString.orange, size: 28),
           ),
           const SizedBox(height: 20),
           Text(
@@ -1448,7 +1461,7 @@ class LandingScreenState extends State<LandingScreen> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             fontSize: 16,
           ),
         ),
@@ -1464,7 +1477,7 @@ class LandingScreenState extends State<LandingScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.5),
             offset: const Offset(0, 10),
             blurRadius: 30,
           ),
@@ -1503,7 +1516,9 @@ class LandingScreenState extends State<LandingScreen> {
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return "Please enter your email";
-                } else if (!RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value)) {
+                } else if (!RegExp(
+                  r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                ).hasMatch(value)) {
                   return "Please enter a valid email";
                 }
                 return null;
@@ -1535,42 +1550,56 @@ class LandingScreenState extends State<LandingScreen> {
               },
             ),
             const SizedBox(height: 30),
-            _isFormSubmitting 
+            _isFormSubmitting
                 ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(ConstantString.orange),
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      ConstantString.orange,
                     ),
-                  )
-                : _buildGradientButton(
-                    "Send Message",
-                    onTap: _submitForm,
-                    isPrimary: true,
-                    width: double.infinity,
                   ),
+                )
+                : _buildGradientButton(
+                  "Send Message",
+                  onTap: _submitForm,
+                  isPrimary: true,
+                  width: double.infinity,
+                ),
           ],
         ),
       ),
     );
   }
-  
+
+  void _sucess() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Message sent successfully!'),
+        backgroundColor: ConstantString.green,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
   void _submitForm() {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() => _isFormSubmitting = true);
-      
+
       // Simulate form submission with a delay
       Future.delayed(const Duration(seconds: 2), () {
         setState(() => _isFormSubmitting = false);
-        
+
         // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Message sent successfully!'),
-            backgroundColor: ConstantString.green,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-        
+        _sucess();
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: const Text('Message sent successfully!'),
+        //     backgroundColor: ConstantString.green,
+        //     behavior: SnackBarBehavior.floating,
+        //     duration: const Duration(seconds: 3),
+        //   ),
+        // );
+
         // Clear form
         _nameController.clear();
         _emailController.clear();
@@ -1595,9 +1624,7 @@ class LandingScreenState extends State<LandingScreen> {
         labelText: label,
         floatingLabelBehavior: FloatingLabelBehavior.auto,
         hintText: label,
-        hintStyle: TextStyle(
-          color: ConstantString.grey.withOpacity(0.7),
-        ),
+        hintStyle: TextStyle(color: ConstantString.grey.withValues(alpha: 0.7)),
         filled: true,
         fillColor: Colors.grey.shade100,
         border: OutlineInputBorder(
@@ -1624,23 +1651,16 @@ class LandingScreenState extends State<LandingScreen> {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: ConstantString.lightBlue.withOpacity(0.1),
+            color: ConstantString.lightBlue.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(
-            icon,
-            color: ConstantString.lightBlue,
-            size: 20,
-          ),
+          child: Icon(icon, color: ConstantString.lightBlue, size: 20),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: Text(
             text,
-            style: TextStyle(
-              color: ConstantString.darkGrey,
-              fontSize: 16,
-            ),
+            style: TextStyle(color: ConstantString.darkGrey, fontSize: 16),
           ),
         ),
       ],
@@ -1654,14 +1674,10 @@ class LandingScreenState extends State<LandingScreen> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: ConstantString.darkBlue.withOpacity(0.1),
+          color: ConstantString.darkBlue.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          icon,
-          color: ConstantString.darkBlue,
-          size: 24,
-        ),
+        child: Icon(icon, color: ConstantString.darkBlue, size: 24),
       ),
     );
   }
