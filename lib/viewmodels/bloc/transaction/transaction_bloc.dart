@@ -1,11 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../../model/transaction_model.dart';
+import 'package:vults/model/transaction_model.dart';
+import 'package:vults/core/service/service.dart';
 
 part 'transaction_event.dart';
 part 'transaction_state.dart';
 
 class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
+  final AuthService _authService = AuthService();
+
   TransactionBloc() : super(TransactionInitial()) {
     on<LoadTransactionsRequested>(_onLoadTransactionsRequested);
     on<LoadTransactionDetailsRequested>(_onLoadTransactionDetailsRequested);
@@ -20,31 +23,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   ) async {
     emit(TransactionLoading());
     try {
-      // Here you would typically call your transaction service
-      // For now, we'll simulate loading transactions
-      await Future.delayed(const Duration(seconds: 1));
-      final transactions = [
-        Transaction(
-          id: '1',
-          senderId: 'user1',
-          receiverId: 'user2',
-          amount: 100.0,
-          timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-          type: TransactionType.send,
-          status: TransactionStatus.completed,
-          description: 'Payment for services',
-        ),
-        Transaction(
-          id: '2',
-          senderId: 'user3',
-          receiverId: 'user1',
-          amount: 50.0,
-          timestamp: DateTime.now().subtract(const Duration(hours: 1)),
-          type: TransactionType.receive,
-          status: TransactionStatus.pending,
-          description: 'Refund',
-        ),
-      ];
+      final transactions = await _authService.getUserTransactions();
       emit(TransactionsLoaded(transactions));
     } catch (e) {
       emit(TransactionError(e.toString()));
@@ -57,18 +36,10 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   ) async {
     emit(TransactionLoading());
     try {
-      // Here you would typically call your transaction service
-      // For now, we'll simulate loading transaction details
-      await Future.delayed(const Duration(milliseconds: 500));
-      final transaction = Transaction(
-        id: event.transactionId,
-        senderId: 'user1',
-        receiverId: 'user2',
-        amount: 100.0,
-        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-        type: TransactionType.send,
-        status: TransactionStatus.completed,
-        description: 'Payment for services',
+      final transactions = await _authService.getUserTransactions();
+      final transaction = transactions.firstWhere(
+        (tx) => tx.id == event.transactionId,
+        orElse: () => throw 'Transaction not found',
       );
       emit(TransactionDetailsLoaded(transaction));
     } catch (e) {
@@ -82,9 +53,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   ) async {
     emit(TransactionLoading());
     try {
-      // Here you would typically call your transaction service
-      // For now, we'll simulate creating a transaction
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Simulate creation (extend here to call Firestore if needed)
       final transaction = Transaction(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         senderId: event.transactionData['senderId'] as String,
@@ -110,8 +79,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     Emitter<TransactionState> emit,
   ) async {
     try {
-      // Here you would typically call your transaction service
-      // For now, we'll simulate cancelling a transaction
       await Future.delayed(const Duration(milliseconds: 500));
       emit(TransactionCancelled(event.transactionId));
     } catch (e) {
@@ -124,8 +91,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     Emitter<TransactionState> emit,
   ) async {
     try {
-      // Here you would typically call your transaction service
-      // For now, we'll simulate confirming a transaction
       await Future.delayed(const Duration(milliseconds: 500));
       emit(TransactionConfirmed(event.transactionId));
     } catch (e) {

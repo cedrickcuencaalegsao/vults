@@ -1,85 +1,106 @@
 import 'package:equatable/equatable.dart';
 
-enum NotificationPreference { all, important, none }
+enum NotificationPreference { all, none, custom }
 
 class SettingsModel extends Equatable {
-  final String language;
-  final NotificationPreference notificationPreference;
+  final String userId;
+  final String firstName;
+  final String lastName;
+  final String email;
   final bool emailNotifications;
   final bool pushNotifications;
   final bool smsNotifications;
-  final Map<String, bool> transactionAlerts;
+  final bool transactionAlerts;
+  final NotificationPreference notificationPreference;
+  final String language;
 
   const SettingsModel({
-    this.language = 'en',
+    required this.userId,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
     this.notificationPreference = NotificationPreference.all,
     this.emailNotifications = true,
     this.pushNotifications = true,
-    this.smsNotifications = false,
-    this.transactionAlerts = const {
-      'large': true,
-      'suspicious': true,
-      'failed': true,
-    },
+    this.smsNotifications = true,
+    this.transactionAlerts = true,
+    this.language = 'en',
   });
+
+  SettingsModel copyWith({
+    String? userId,
+    String? firstName,
+    String? lastName,
+    String? email,
+    bool? emailNotifications,
+    bool? pushNotifications,
+    bool? smsNotifications,
+    bool? transactionAlerts,
+    NotificationPreference? notificationPreference,
+    String? language,
+  }) {
+    return SettingsModel(
+      userId: userId ?? this.userId,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      email: email ?? this.email,
+      emailNotifications: emailNotifications ?? this.emailNotifications,
+      pushNotifications: pushNotifications ?? this.pushNotifications,
+      smsNotifications: smsNotifications ?? this.smsNotifications,
+      transactionAlerts: transactionAlerts ?? this.transactionAlerts,
+      notificationPreference:
+          notificationPreference ?? this.notificationPreference,
+      language: language ?? this.language,
+    );
+  }
 
   factory SettingsModel.fromJson(Map<String, dynamic> json) {
     return SettingsModel(
-      language: json['language'] as String? ?? 'en',
-      notificationPreference: NotificationPreference.values.firstWhere(
-        (e) =>
-            e.toString() ==
-            'NotificationPreference.${json['notificationPreference']}',
-        orElse: () => NotificationPreference.all,
-      ),
-      emailNotifications: json['emailNotifications'] as bool? ?? true,
-      pushNotifications: json['pushNotifications'] as bool? ?? true,
-      smsNotifications: json['smsNotifications'] as bool? ?? false,
-      transactionAlerts: Map<String, bool>.from(
-        json['transactionAlerts'] ??
-            {'large': true, 'suspicious': true, 'failed': true},
-      ),
+      userId: json['userId'] ?? '',
+      firstName: json['firstName'] ?? '',
+      lastName: json['lastName'] ?? '',
+      email: json['email'] ?? '',
+      notificationPreference:
+          json['notificationPreference'] == 'none'
+              ? NotificationPreference.none
+              : json['notificationPreference'] == 'custom'
+              ? NotificationPreference.custom
+              : NotificationPreference.all,
+      emailNotifications: json['emailNotifications'] ?? true,
+      pushNotifications: json['pushNotifications'] ?? true,
+      smsNotifications: json['smsNotifications'] ?? true,
+      transactionAlerts: json['transactionAlerts'] ?? true,
+      language: json['language'] ?? 'en',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'language': language,
+      'userId': userId,
+      'firstName': firstName,
+      'lastName': lastName,
+      'email': email,
       'notificationPreference':
           notificationPreference.toString().split('.').last,
       'emailNotifications': emailNotifications,
       'pushNotifications': pushNotifications,
       'smsNotifications': smsNotifications,
       'transactionAlerts': transactionAlerts,
+      'language': language,
     };
-  }
-
-  SettingsModel copyWith({
-    String? language,
-    NotificationPreference? notificationPreference,
-    bool? emailNotifications,
-    bool? pushNotifications,
-    bool? smsNotifications,
-    Map<String, bool>? transactionAlerts,
-  }) {
-    return SettingsModel(
-      language: language ?? this.language,
-      notificationPreference:
-          notificationPreference ?? this.notificationPreference,
-      emailNotifications: emailNotifications ?? this.emailNotifications,
-      pushNotifications: pushNotifications ?? this.pushNotifications,
-      smsNotifications: smsNotifications ?? this.smsNotifications,
-      transactionAlerts: transactionAlerts ?? this.transactionAlerts,
-    );
   }
 
   @override
   List<Object?> get props => [
-    language,
-    notificationPreference,
+    userId,
+    firstName,
+    lastName,
+    email,
     emailNotifications,
     pushNotifications,
     smsNotifications,
     transactionAlerts,
+    notificationPreference,
+    language,
   ];
 }

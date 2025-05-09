@@ -26,17 +26,33 @@ class Transaction {
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
+    // Handle different timestamp formats from Firestore
+    DateTime parseTimestamp(dynamic timestamp) {
+      if (timestamp == null) return DateTime.now();
+      if (timestamp is DateTime) return timestamp;
+      if (timestamp is String) return DateTime.parse(timestamp);
+      // Handle Firestore Timestamp
+      if (timestamp.runtimeType.toString().contains('Timestamp')) {
+        return timestamp.toDate();
+      }
+      return DateTime.now();
+    }
+    
     return Transaction(
       id: json['id'] as String,
-      senderId: json['senderId'] as String,
-      receiverId: json['receiverId'] as String,
+      senderId: (json['senderId'] ?? json['fromAccountId'] ?? '') as String,
+      receiverId: (json['receiverId'] ?? json['toAccountId'] ?? '') as String,
       amount: (json['amount'] as num).toDouble(),
-      timestamp: DateTime.parse(json['timestamp'] as String),
+      timestamp: parseTimestamp(json['timestamp']),
       type: TransactionType.values.firstWhere(
         (e) => e.toString() == 'TransactionType.${json['type']}',
+        orElse: () => json['fromAccountId'] != null
+            ? TransactionType.send
+            : TransactionType.receive,
       ),
       status: TransactionStatus.values.firstWhere(
         (e) => e.toString() == 'TransactionStatus.${json['status']}',
+        orElse: () => TransactionStatus.completed,
       ),
       description: json['description'] as String?,
     );
@@ -85,5 +101,43 @@ class Transaction {
       status: status ?? this.status,
       description: description ?? this.description,
     );
+  }
+}
+
+class TransactionModel {
+  final String fromAccount;
+  final String toAccount;
+  final String fromAccountId;
+  final String toAccountId;
+  final double amount;
+  final String accountType;
+  final String reference;
+  final DateTime timestamp;
+  final String status;
+
+  TransactionModel({
+    required this.fromAccount,
+    required this.toAccount,
+    required this.fromAccountId,
+    required this.toAccountId,
+    required this.amount,
+    required this.accountType,
+    required this.reference,
+    required this.timestamp,
+    required this.status,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'fromAccount': fromAccount,
+      'toAccount': toAccount,
+      'fromAccountId': fromAccountId,
+      'toAccountId': toAccountId,
+      'amount': amount,
+      'accountType': accountType,
+      'reference': reference,
+      'timestamp': timestamp,
+      'status': status,
+    };
   }
 }
