@@ -26,17 +26,33 @@ class Transaction {
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
+    // Handle different timestamp formats from Firestore
+    DateTime parseTimestamp(dynamic timestamp) {
+      if (timestamp == null) return DateTime.now();
+      if (timestamp is DateTime) return timestamp;
+      if (timestamp is String) return DateTime.parse(timestamp);
+      // Handle Firestore Timestamp
+      if (timestamp.runtimeType.toString().contains('Timestamp')) {
+        return timestamp.toDate();
+      }
+      return DateTime.now();
+    }
+    
     return Transaction(
       id: json['id'] as String,
-      senderId: json['senderId'] as String,
-      receiverId: json['receiverId'] as String,
+      senderId: (json['senderId'] ?? json['fromAccountId'] ?? '') as String,
+      receiverId: (json['receiverId'] ?? json['toAccountId'] ?? '') as String,
       amount: (json['amount'] as num).toDouble(),
-      timestamp: DateTime.parse(json['timestamp'] as String),
+      timestamp: parseTimestamp(json['timestamp']),
       type: TransactionType.values.firstWhere(
         (e) => e.toString() == 'TransactionType.${json['type']}',
+        orElse: () => json['fromAccountId'] != null
+            ? TransactionType.send
+            : TransactionType.receive,
       ),
       status: TransactionStatus.values.firstWhere(
         (e) => e.toString() == 'TransactionStatus.${json['status']}',
+        orElse: () => TransactionStatus.completed,
       ),
       description: json['description'] as String?,
     );

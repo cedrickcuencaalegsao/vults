@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vults/model/device_info_plus.dart';
 import 'package:vults/model/user_model.dart' as model;
-import 'package:vults/model/transaction_model.dart' as transaction_model;
+import 'package:vults/model/transaction_model.dart' as transaction_model;  // Update this import
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -122,26 +122,64 @@ class AuthService {
     return null;
   }
 
-  Future<List<transaction_model.Transaction>> getUserTransactions() async {
-    try {
-      final user = _auth.currentUser;
-      if (user == null) {
-        throw 'No authenticated user found';
-      }
-
-      final QuerySnapshot transactionsSnapshot =
-          await _firestore
-              .collection('transactions')
-              .where('userId', isEqualTo: user.uid)
-              .orderBy('timestamp', descending: true)
-              .get();
-
-      return transactionsSnapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return transaction_model.Transaction.fromJson({'id': doc.id, ...data});
-      }).toList();
-    } catch (e) {
-      throw 'Empty transaction list.';
+Future<List<transaction_model.Transaction>> getUserTransactions() async {
+  try {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw 'No authenticated user found';
     }
+
+    // Get transactions where user is the sender
+    final QuerySnapshot sentTransactionsSnapshot = await _firestore
+        .collection('transactions')
+        .where('fromAccountId', isEqualTo: user.uid)
+        .get();
+
+    // Get transactions where user is the receiver
+    final QuerySnapshot receivedTransactionsSnapshot = await _firestore
+        .collection('transactions')
+        .where('toAccountId', isEqualTo: user.uid)
+        .get();
+
+    // Process sent transactions
+    List<transaction_model.Transaction> sentTransactions = sentTransactionsSnapshot.docs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      return transaction_model.Transaction.fromJson({
+        'id': doc.id,
+        'senderId': data['fromAccountId'],
+        'receiverId': data['toAccountId'],
+        'amount': data['amount'],
+        'timestamp': data['timestamp'],
+        'type': 'send',
+        'status': data['status'] ?? 'completed',
+        'description': data['reference'],
+      });
+    }).toList();
+
+    // Process received transactions
+    List<transaction_model.Transaction> receivedTransactions = receivedTransactionsSnapshot.docs.map((doc) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      return transaction_model.Transaction.fromJson({
+        'id': doc.id,
+        'senderId': data['fromAccountId'],
+        'receiverId': data['toAccountId'],
+        'amount': data['amount'],
+        'timestamp': data['timestamp'],
+        'type': 'receive',
+        'status': data['status'] ?? 'completed',
+        'description': data['reference'],
+      });
+    }).toList();
+
+    // Combine both lists
+    List<transaction_model.Transaction> allTransactions = [...sentTransactions, ...receivedTransactions];
+    
+    // Sort combined list by timestamp (newest first)
+    allTransactions.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+    return allTransactions;
+  } catch (e) {
+    throw 'Failed to load transactions: $e';
   }
+}
 }
