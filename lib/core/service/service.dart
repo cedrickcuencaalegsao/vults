@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vults/model/device_info_plus.dart';
 import 'package:vults/model/user_model.dart' as model;
+import 'package:vults/model/transaction_model.dart' as transaction_model;
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -65,8 +66,7 @@ class AuthService {
         'deviceInfo': deviceInfo['deviceInfo'],
       });
     } catch (e) {
-      // Silent fail - don't disrupt main auth flow
-      print('Device tracking failed: $e');
+      return Future.error('Failed to track device: $e');
     }
   }
 
@@ -121,6 +121,27 @@ class AuthService {
     }
     return null;
   }
-}
 
-class SystemService {}
+  Future<List<transaction_model.Transaction>> getUserTransactions() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw 'No authenticated user found';
+      }
+
+      final QuerySnapshot transactionsSnapshot =
+          await _firestore
+              .collection('transactions')
+              .where('userId', isEqualTo: user.uid)
+              .orderBy('timestamp', descending: true)
+              .get();
+
+      return transactionsSnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return transaction_model.Transaction.fromJson({'id': doc.id, ...data});
+      }).toList();
+    } catch (e) {
+      throw 'Empty transaction list.';
+    }
+  }
+}
