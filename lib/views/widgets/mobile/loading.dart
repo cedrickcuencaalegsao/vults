@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:vults/core/constants/constant_string.dart';
 
-class ErrorSnackBar {
+class LoadingSnackBar {
   static void show({
     required BuildContext context,
     required String message,
-    Color backgroundColor = ConstantString.red,
+    Color backgroundColor = ConstantString.lightBlue,
     Duration duration = const Duration(seconds: 3),
   }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.white),
+            CircularProgressIndicator(
+              color: ConstantString.white,
+            ),
             SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -27,7 +29,9 @@ class ErrorSnackBar {
         ),
         backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
         margin: EdgeInsets.all(10),
         duration: duration,
         action: SnackBarAction(
