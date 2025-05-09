@@ -4,6 +4,9 @@ import 'package:vults/core/constants/constant_string.dart';
 import 'package:vults/views/widgets/mobile/account_card.dart';
 import 'package:vults/views/widgets/mobile/dashboard_cards.dart';
 import 'package:vults/views/widgets/mobile/recent_transcation_card.dart';
+import 'package:vults/core/service/service.dart';
+import 'package:vults/model/user_model.dart';
+import 'package:intl/intl.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -18,22 +21,24 @@ class DashboardScreenState extends State<DashboardScreen> {
     initialPage: 0,
   );
   int _currentPage = 0;
-
-  final List<Map<String, String>> accountCards = [
-    {
-      'type': 'Fix Deposit',
-      'balance': '100,000.00',
-      'number': '****-****-1234',
-    },
-    {'type': 'Savings', 'balance': '50,000.00', 'number': '****-****-5678'},
-    {'type': 'Buseness', 'balance': '75,000.00', 'number': '****-****-9012'},
-    {'type': 'Checking', 'balance': '25,000.00', 'number': '****-****-3456'},
-  ];
+  User? currentuser;
+  final _authService = AuthService();
 
   @override
   void initState() {
     super.initState();
     _pageController.addListener(_pageListener);
+    _fetUserData();
+  }
+
+  void _fetUserData() async {
+    try {
+      currentuser = await _authService.getCurrentUser();
+      debugPrint("Current User ID: ${currentuser?.userAccounts}");
+      setState(() {});
+    } catch (e) {
+      print(e);
+    }
   }
 
   void _pageListener() {
@@ -63,7 +68,7 @@ class DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  void navigate(String route){
+  void navigate(String route) {
     Navigator.pushNamed(context, route);
   }
 
@@ -72,6 +77,30 @@ class DashboardScreenState extends State<DashboardScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     final padding = MediaQuery.of(context).padding;
+
+    List<Map<String, String>> accountCards = [];
+    if (currentuser != null && currentuser!.userAccounts.isNotEmpty) {
+      accountCards =
+          currentuser!.userAccounts.map<Map<String, String>>((account) {
+            final Map<String, dynamic> map = Map<String, dynamic>.from(account);
+            final accountId = map['account_id'].toString();
+            map.remove('account_id'); // Now only one key like 'savings', etc.
+            final accountType = map.keys.first;
+            final balance = map[accountType].toString();
+
+            return {
+              'type': accountType == 'fixed_deposit'
+                  ? 'Fixed Deposit'
+                  : accountType == 'savings'
+                      ? 'Savings'
+                      : accountType == 'business'
+                          ? 'Business'
+                          : 'Checking',
+              'balance': balance,
+              'number': accountId,
+            };
+          }).toList();
+    }
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -102,7 +131,9 @@ class DashboardScreenState extends State<DashboardScreen> {
                   ),
                   SizedBox(height: screenHeight * 0.01),
                   Text(
-                    'John Doe',
+                    currentuser != null
+                        ? '${currentuser!.firstName} ${currentuser!.lastName}'
+                        : 'Loading...',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -110,8 +141,11 @@ class DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
                   SizedBox(height: screenHeight * 0.01),
+
                   Text(
-                    'Member since: YYYY-MM-DD',
+                    currentuser != null
+                        ? 'Joined: ${DateFormat('yyyy-MM-dd').format(currentuser!.createdAt)}'
+                        : 'Loading...',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -216,7 +250,8 @@ class DashboardScreenState extends State<DashboardScreen> {
                                   ConstantString.green,
                                   ConstantString.orange,
                                   ConstantString.darkBlue,
-                                ][index],
+                                ][index %
+                                    4], // Use modulo to ensure index is within bounds
                           ),
                         );
                       },
@@ -311,7 +346,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                     date: "March 12, 2023",
                     cardIcon: Icons.arrow_upward_rounded,
                   ),
-                   RecentTranscationCard(
+                  RecentTranscationCard(
                     padding: screenHeight * 0.01,
                     height: screenHeight * 0.09,
                     widget: screenWidth * 0.85,
