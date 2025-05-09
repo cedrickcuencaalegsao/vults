@@ -63,7 +63,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       title: ConstantString.appName,
       debugShowCheckedModeBanner: false,
-      routes: kIsWeb ? MobileRoutes.getRoutes() : WebRoutes.getRoutes(),
+      routes: kIsWeb ? WebRoutes.getRoutes() : MobileRoutes.getRoutes(),
     );
   }
 }
