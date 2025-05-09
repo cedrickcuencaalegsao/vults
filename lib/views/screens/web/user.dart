@@ -10,6 +10,7 @@ class User {
   final String role;
   String status;
   bool isVerified;
+  List<String> accountTypes;
 
   User({
     required this.id,
@@ -18,6 +19,7 @@ class User {
     required this.role,
     required this.status,
     this.isVerified = false,
+    this.accountTypes = const [],
   });
 
   User copyWith({
@@ -27,6 +29,7 @@ class User {
     String? role,
     String? status,
     bool? isVerified,
+    List<String>? accountTypes,
   }) {
     return User(
       id: id ?? this.id,
@@ -35,6 +38,7 @@ class User {
       role: role ?? this.role,
       status: status ?? this.status,
       isVerified: isVerified ?? this.isVerified,
+      accountTypes: accountTypes ?? this.accountTypes,
     );
   }
 }
@@ -67,6 +71,7 @@ class _UserManagementContentState extends State<UserManagementContent> {
       role: 'Admin',
       status: 'Active',
       isVerified: true,
+      accountTypes: ['Savings', 'Fixed Deposit'],
     ),
     User(
       id: '002',
@@ -75,6 +80,7 @@ class _UserManagementContentState extends State<UserManagementContent> {
       role: 'User',
       status: 'Active',
       isVerified: false,
+      accountTypes: ['Checking'],
     ),
     User(
       id: '003',
@@ -83,6 +89,7 @@ class _UserManagementContentState extends State<UserManagementContent> {
       role: 'User',
       status: 'Inactive',
       isVerified: false,
+      accountTypes: ['Business'],
     ),
     User(
       id: '004',
@@ -91,6 +98,7 @@ class _UserManagementContentState extends State<UserManagementContent> {
       role: 'User',
       status: 'Active',
       isVerified: true,
+      accountTypes: ['Savings', 'Business'],
     ),
     User(
       id: '005',
@@ -99,6 +107,7 @@ class _UserManagementContentState extends State<UserManagementContent> {
       role: 'User',
       status: 'Pending',
       isVerified: false,
+      accountTypes: ['Checking'],
     ),
   ];
 
@@ -178,6 +187,24 @@ class _UserManagementContentState extends State<UserManagementContent> {
         _filterUsers();
       }
     });
+  }
+
+  void _manageAccountTypes(User user) {
+    showDialog(
+      context: context,
+      builder: (context) => AccountTypesDialog(
+        user: user,
+        onSave: (updatedUser) {
+          setState(() {
+            final index = _users.indexWhere((u) => u.id == updatedUser.id);
+            if (index != -1) {
+              _users[index] = updatedUser;
+              _filterUsers();
+            }
+          });
+        },
+      ),
+    );
   }
 
   @override
@@ -306,13 +333,14 @@ class _UserManagementContentState extends State<UserManagementContent> {
         columnSpacing: 20,
         headingRowColor: MaterialStateProperty.all(Colors.grey.shade50),
         columns: const [
-          DataColumn(label: Text('ID')),
-          DataColumn(label: Text('Name')),
-          DataColumn(label: Text('Email')),
-          DataColumn(label: Text('Role')),
-          DataColumn(label: Text('Status')),
-          DataColumn(label: Text('Verified')),
-          DataColumn(label: Text('Actions')),
+          DataColumn(label: const Text('ID')),
+          DataColumn(label: const Text('Name')),
+          DataColumn(label: const Text('Email')),
+          DataColumn(label: const Text('Role')),
+          DataColumn(label: const Text('Status')),
+          DataColumn(label: const Text('Verified')),
+          DataColumn(label: const Text('Account Types')),
+          DataColumn(label: const Text('Actions')),
         ],
         rows:
             _filteredUsers.map((user) {
@@ -327,55 +355,53 @@ class _UserManagementContentState extends State<UserManagementContent> {
                       value: user.status,
                       underline: Container(),
                       icon: const Icon(Icons.arrow_drop_down, size: 16),
-                      items:
-                          ['Active', 'Inactive', 'Pending'].map((status) {
-                            return DropdownMenuItem<String>(
-                              value: status,
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    status == 'Active'
-                                        ? Icons.check_circle
-                                        : status == 'Inactive'
+                      items: ['Active', 'Inactive', 'Pending'].map((status) {
+                        return DropdownMenuItem<String>(
+                          value: status,
+                          child: Row(
+                            children: [
+                              Icon(
+                                status == 'Active'
+                                    ? Icons.check_circle
+                                    : status == 'Inactive'
                                         ? Icons.cancel
                                         : Icons.pending,
-                                    size: 16,
-                                    color:
-                                        status == 'Active'
-                                            ? Colors.green
-                                            : status == 'Inactive'
-                                            ? Colors.red
-                                            : Colors.orange,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(status),
-                                ],
+                                size: 16,
+                                color: status == 'Active'
+                                    ? Colors.green
+                                    : status == 'Inactive'
+                                        ? Colors.red
+                                        : Colors.orange,
                               ),
-                            );
-                          }).toList(),
-                      onChanged: (newValue) {
-                        if (newValue != null) {
-                          _changeStatus(user, newValue);
+                              const SizedBox(width: 8),
+                              Text(status),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (String? value) {
+                        if (value != null) {
+                          _changeStatus(user, value);
                         }
                       },
                     ),
                   ),
-                  DataCell(
-                    Switch(
-                      value: user.isVerified,
-                      activeColor: ConstantString.lightBlue,
-                      onChanged: (value) {
-                        _toggleVerification(user);
-                      },
-                    ),
-                  ),
+                  DataCell(Icon(
+                    user.isVerified ? Icons.check_circle : Icons.cancel,
+                    color: user.isVerified ? Colors.green : Colors.red,
+                  )),
+                  DataCell(Text(user.accountTypes.join(', '))),
                   DataCell(
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.edit, size: 20),
-                          tooltip: 'Edit User',
+                          icon: const Icon(Icons.account_balance_wallet),
+                          onPressed: () => _manageAccountTypes(user),
+                          tooltip: 'Manage Account Types',
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit),
                           onPressed: () => _editUser(user),
                         ),
                       ],
@@ -663,6 +689,83 @@ class _EditUserDialogState extends State<EditUserDialog> {
             backgroundColor: ConstantString.lightBlue,
             foregroundColor: Colors.white,
           ),
+          child: const Text('Save'),
+        ),
+      ],
+    );
+  }
+}
+
+// Dialog for managing account types
+class AccountTypesDialog extends StatefulWidget {
+  final User user;
+  final Function(User) onSave;
+
+  const AccountTypesDialog({
+    super.key,
+    required this.user,
+    required this.onSave,
+  });
+
+  @override
+  _AccountTypesDialogState createState() => _AccountTypesDialogState();
+}
+
+class _AccountTypesDialogState extends State<AccountTypesDialog> {
+  late List<String> _selectedAccountTypes;
+
+  final List<String> _availableAccountTypes = [
+    'Fixed Deposit',
+    'Business',
+    'Savings',
+    'Checking',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedAccountTypes = List.from(widget.user.accountTypes);
+  }
+
+  void _toggleAccountType(String accountType) {
+    setState(() {
+      if (_selectedAccountTypes.contains(accountType)) {
+        _selectedAccountTypes.remove(accountType);
+      } else {
+        _selectedAccountTypes.add(accountType);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Manage Account Types for '),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: _availableAccountTypes.map((accountType) {
+          return CheckboxListTile(
+            title: Text(accountType),
+            value: _selectedAccountTypes.contains(accountType),
+            onChanged: (bool? value) {
+              _toggleAccountType(accountType);
+            },
+          );
+        }).toList(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            final updatedUser = widget.user.copyWith(
+              accountTypes: _selectedAccountTypes,
+            );
+            widget.onSave(updatedUser);
+            Navigator.of(context).pop();
+          },
           child: const Text('Save'),
         ),
       ],

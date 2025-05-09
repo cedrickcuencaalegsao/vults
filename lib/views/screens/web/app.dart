@@ -3,6 +3,8 @@ import 'package:vults/core/constants/constant_string.dart';
 import 'package:vults/views/screens/web/admin_dashboard.dart';
 import 'package:vults/views/screens/web/transaction.dart';
 import 'package:vults/views/screens/web/user.dart';
+import 'package:vults/views/screens/web/analytics_screen.dart';
+
 
 // App Container Widget
 class AppContainer extends StatefulWidget {
@@ -235,7 +237,7 @@ class AppContainerState extends State<AppContainer> {
       case 2:
         return const UsersView();
       case 3:
-        return const Center(child: Text('Analytics View - Coming Soon'));
+        return const AnalyticsView();
       default:
         return const DashboardView();
     }
