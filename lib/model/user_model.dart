@@ -18,6 +18,7 @@ class User extends Equatable {
   final UserStatus status;
   final DateTime createdAt;
   final DateTime? lastLogin;
+  final List<Map<String, dynamic>> userAccounts;
 
   const User({
     required this.id,
@@ -35,6 +36,12 @@ class User extends Equatable {
     this.status = UserStatus.active,
     required this.createdAt,
     this.lastLogin,
+    this.userAccounts = const [
+      {"fixed_deposit": 0},
+      {"savings": 0},
+      {"business": 0},
+      {"checking": 0},
+    ],
   });
 
   String get fullName =>
@@ -68,6 +75,14 @@ class User extends Equatable {
           json['lastLogin'] != null
               ? DateTime.parse(json['lastLogin'] as String)
               : null,
+      userAccounts: json['userAccounts'] != null
+          ? List<Map<String, dynamic>>.from(json['userAccounts'])
+          : const [
+             {"fixed_deposit": 0},
+      {"savings": 0},
+      {"business": 0},
+      {"checking": 0},
+            ],
     );
   }
 
@@ -88,6 +103,7 @@ class User extends Equatable {
       'status': status.toString().split('.').last,
       'createdAt': createdAt.toIso8601String(),
       'lastLogin': lastLogin?.toIso8601String(),
+      'userAccounts': userAccounts,
     };
   }
 
@@ -107,6 +123,7 @@ class User extends Equatable {
     UserStatus? status,
     DateTime? createdAt,
     DateTime? lastLogin,
+    List<Map<String, dynamic>>? userAccounts,
   }) {
     return User(
       id: id ?? this.id,
@@ -124,6 +141,7 @@ class User extends Equatable {
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       lastLogin: lastLogin ?? this.lastLogin,
+      userAccounts: userAccounts ?? this.userAccounts,
     );
   }
 
@@ -144,5 +162,6 @@ class User extends Equatable {
     status,
     createdAt,
     lastLogin,
+    userAccounts,
   ];
 }
