@@ -87,3 +87,41 @@ class Transaction {
     );
   }
 }
+
+class TransactionModel {
+  final String fromAccount;
+  final String toAccount;
+  final String fromAccountId;
+  final String toAccountId;
+  final double amount;
+  final String accountType;
+  final String reference;
+  final DateTime timestamp;
+  final String status;
+
+  TransactionModel({
+    required this.fromAccount,
+    required this.toAccount,
+    required this.fromAccountId,
+    required this.toAccountId,
+    required this.amount,
+    required this.accountType,
+    required this.reference,
+    required this.timestamp,
+    required this.status,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'fromAccount': fromAccount,
+      'toAccount': toAccount,
+      'fromAccountId': fromAccountId,
+      'toAccountId': toAccountId,
+      'amount': amount,
+      'accountType': accountType,
+      'reference': reference,
+      'timestamp': timestamp,
+      'status': status,
+    };
+  }
+}
