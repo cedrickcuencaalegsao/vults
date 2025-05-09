@@ -23,7 +23,7 @@ class UpdateNotificationPreferencesRequested extends SettingsEvent {
   final bool emailNotifications;
   final bool pushNotifications;
   final bool smsNotifications;
-  final Map<String, bool> transactionAlerts;
+  final bool transactionAlerts; // Changed from Map to bool
 
   const UpdateNotificationPreferencesRequested({
     required this.preference,
@@ -50,4 +50,9 @@ class UpdateLanguageRequested extends SettingsEvent {
 
   @override
   List<Object> get props => [language];
+}
+
+class SignOutRequested extends SettingsEvent {
+  @override
+  List<Object?> get props => [];
 }

@@ -17,7 +17,7 @@ class SettingsLoaded extends SettingsState {
   const SettingsLoaded({required this.settings});
 
   @override
-  List<Object> get props => [settings];
+  List<Object?> get props => [settings];
 }
 
 class SettingsUpdated extends SettingsState {
@@ -26,8 +26,10 @@ class SettingsUpdated extends SettingsState {
   const SettingsUpdated(this.settings);
 
   @override
-  List<Object> get props => [settings];
+  List<Object?> get props => [settings];
 }
+
+class SettingsSignedOut extends SettingsState {}
 
 class SettingsError extends SettingsState {
   final String message;
@@ -35,5 +37,5 @@ class SettingsError extends SettingsState {
   const SettingsError(this.message);
 
   @override
-  List<Object> get props => [message];
+  List<Object?> get props => [message];
 }
