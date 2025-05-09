@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:vults/model/device_info_plus.dart';
 import 'package:vults/model/user_model.dart' as model;
+import 'package:vults/model/transaction_model.dart' as transaction_model;
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -50,6 +52,24 @@ class AuthService {
     return newUser;
   }
 
+  // Add new method for device tracking
+  Future<void> trackDevice(String userId) async {
+    try {
+      final deviceInfo = await PlatformService.getDeviceInfo();
+
+      await _firestore.collection('devices').add({
+        'userId': userId,
+        'name': deviceInfo['name'],
+        'type': deviceInfo['type'],
+        'status': 'active',
+        'lastActive': FieldValue.serverTimestamp(),
+        'deviceInfo': deviceInfo['deviceInfo'],
+      });
+    } catch (e) {
+      return Future.error('Failed to track device: $e');
+    }
+  }
+
   Future<model.User?> login({
     required String email,
     required String pin,
@@ -64,7 +84,14 @@ class AuthService {
           await _firestore.collection('users').doc(uid).get();
 
       if (userDoc.exists) {
-        return model.User.fromJson(userDoc.data() as Map<String, dynamic>);
+        final userData = userDoc.data() as Map<String, dynamic>;
+        // Ensure the id is not null by adding it to userData
+        userData['id'] = uid;
+
+        final user = model.User.fromJson(userData);
+        // Track device using the non-null uid
+        await trackDevice(uid);
+        return user;
       }
 
       return null;
@@ -94,6 +121,27 @@ class AuthService {
     }
     return null;
   }
-}
 
-class SystemService {}
+  Future<List<transaction_model.Transaction>> getUserTransactions() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw 'No authenticated user found';
+      }
+
+      final QuerySnapshot transactionsSnapshot =
+          await _firestore
+              .collection('transactions')
+              .where('userId', isEqualTo: user.uid)
+              .orderBy('timestamp', descending: true)
+              .get();
+
+      return transactionsSnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return transaction_model.Transaction.fromJson({'id': doc.id, ...data});
+      }).toList();
+    } catch (e) {
+      throw 'Empty transaction list.';
+    }
+  }
+}

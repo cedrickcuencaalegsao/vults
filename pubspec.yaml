@@ -19,6 +19,7 @@ dependencies:
   syncfusion_flutter_charts: ^29.1.35
   auto_size_text: ^3.0.0
   mobile_scanner: ^3.5.0
+  device_info_plus: ^9.1.2
 
 dev_dependencies:
   flutter_test:

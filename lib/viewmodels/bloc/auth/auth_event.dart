@@ -12,17 +12,14 @@ class AuthLoginRequested extends AuthEvent {
   final String email;
   final String pin;
 
-  const AuthLoginRequested({
-    required this.email,
-    required this.pin,
-  });
+  const AuthLoginRequested({required this.email, required this.pin});
 
   @override
   List<Object> get props => [email, pin];
 }
 
 class AuthRegisterRequested extends AuthEvent {
-final String email;
+  final String email;
   final String firstName;
   final String? middleName;
   final String lastName;
@@ -40,15 +37,25 @@ final String email;
 
   @override
   List<Object?> get props => [
-        email,
-        firstName,
-        middleName,
-        lastName,
-        birthday,
-        pin,
-      ];
+    email,
+    firstName,
+    middleName,
+    lastName,
+    birthday,
+    pin,
+  ];
 }
 
 class AuthLogoutRequested extends AuthEvent {}
 
 class AuthCheckRequested extends AuthEvent {}
+
+class SignInRequested extends AuthEvent {
+  final String email;
+  final String pin;
+
+  const SignInRequested({required this.email, required this.pin});
+
+  @override
+  List<Object> get props => [email, pin];
+}

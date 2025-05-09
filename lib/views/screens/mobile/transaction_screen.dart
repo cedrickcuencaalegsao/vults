@@ -137,9 +137,27 @@ class TransactionScreenState extends State<TransactionScreen> {
                 );
               }
               if (state is TransactionError) {
-                return Center(child: Text(state.message));
+                return Center(
+                  child: Text(
+                    state.message,
+                    style: TextStyle(
+                      fontFamily: ConstantString.fontFredoka,
+                      color: ConstantString.white,
+                      fontSize: 18,
+                    ),
+                  ),
+                );
               }
-              return const Center(child: Text('No transactions found'));
+              return Center(
+                child: Text(
+                  'No transactions found',
+                  style: TextStyle(
+                    fontFamily: ConstantString.fontFredoka,
+                    color: ConstantString.white,
+                    fontSize: 18,
+                  ),
+                ),
+              );
             },
           ),
         ),
@@ -239,8 +257,6 @@ class TransactionScreenState extends State<TransactionScreen> {
         return Icons.arrow_upward;
       case TransactionType.receive:
         return Icons.arrow_downward;
-      default:
-        return Icons.monetization_on;
     }
   }
 

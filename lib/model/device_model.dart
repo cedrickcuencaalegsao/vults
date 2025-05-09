@@ -1,44 +1,25 @@
-import 'package:equatable/equatable.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum DeviceType { mobile, tablet, desktop, web }
 
-enum DeviceStatus { active, inactive, blocked }
+enum DeviceStatus { active, inactive }
 
-class DeviceModel extends Equatable {
+class DeviceModel {
   final String id;
   final String name;
   final DeviceType type;
   final DeviceStatus status;
-  final String platform;
-  final String lastIp;
   final DateTime lastActive;
-  final bool isCurrent;
-  final Map<String, dynamic>? metadata;
+  final String userId;
 
-  const DeviceModel({
+  DeviceModel({
     required this.id,
     required this.name,
     required this.type,
     required this.status,
-    required this.platform,
-    required this.lastIp,
     required this.lastActive,
-    this.isCurrent = false,
-    this.metadata,
+    required this.userId,
   });
-
-  @override
-  List<Object?> get props => [
-    id,
-    name,
-    type,
-    status,
-    platform,
-    lastIp,
-    lastActive,
-    isCurrent,
-    metadata,
-  ];
 
   factory DeviceModel.fromJson(Map<String, dynamic> json) {
     return DeviceModel(
@@ -50,11 +31,8 @@ class DeviceModel extends Equatable {
       status: DeviceStatus.values.firstWhere(
         (e) => e.toString() == 'DeviceStatus.${json['status']}',
       ),
-      platform: json['platform'] as String,
-      lastIp: json['lastIp'] as String,
-      lastActive: DateTime.parse(json['lastActive'] as String),
-      isCurrent: json['isCurrent'] as bool? ?? false,
-      metadata: json['metadata'] as Map<String, dynamic>?,
+      lastActive: (json['lastActive'] as Timestamp).toDate(),
+      userId: json['userId'] as String,
     );
   }
 
@@ -64,11 +42,8 @@ class DeviceModel extends Equatable {
       'name': name,
       'type': type.toString().split('.').last,
       'status': status.toString().split('.').last,
-      'platform': platform,
-      'lastIp': lastIp,
-      'lastActive': lastActive.toIso8601String(),
-      'isCurrent': isCurrent,
-      'metadata': metadata,
+      'lastActive': Timestamp.fromDate(lastActive),
+      'userId': userId,
     };
   }
 }
