@@ -5,6 +5,8 @@ import 'package:vults/core/constants/constant_string.dart';
 import 'package:vults/core/service/transaction_service.dart';
 import 'package:vults/model/account_type.dart';
 import 'package:vults/views/widgets/mobile/app_bar.dart';
+import 'package:vults/views/widgets/mobile/error.dart';
+import 'package:vults/views/widgets/mobile/success.dart';
 
 class SendmoneyFirstScreen extends StatefulWidget {
   const SendmoneyFirstScreen({super.key});
@@ -18,6 +20,23 @@ class SendmoneyFirstScreenState extends State<SendmoneyFirstScreen> {
   final _accountController = TextEditingController();
   final _amountController = TextEditingController();
   AccountType selectedAccountType = AccountType.savings;
+
+  void _handleErrors(message) {
+    ErrorSnackBar.show(
+      context: context,
+      message: message,
+      backgroundColor: ConstantString.red,
+    );
+  }
+
+  void _navigateTransaction(transaction) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SendmoneySecondScreen(transaction: transaction),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -222,23 +241,15 @@ class SendmoneyFirstScreenState extends State<SendmoneyFirstScreen> {
                           final hasSufficientBalance =
                               await _checkSufficientBalance(amount);
                           if (!hasSufficientBalance) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Insufficient balance in selected account',
-                                ),
-                              ),
+                            _handleErrors(
+                              'Insufficient balance in selected account',
                             );
                             return;
                           }
 
                           final currentUser = FirebaseAuth.instance.currentUser;
                           if (currentUser == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Please login first'),
-                              ),
-                            );
+                            _handleErrors('Please login first');
                             return;
                           }
 
@@ -252,16 +263,16 @@ class SendmoneyFirstScreenState extends State<SendmoneyFirstScreen> {
                                 DateTime.now().millisecondsSinceEpoch
                                     .toString(),
                           );
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => SendmoneySecondScreen(
-                                    transaction: transaction,
-                                  ),
-                            ),
-                          );
+                          _navigateTransaction(transaction);
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder:
+                          //         (context) => SendmoneySecondScreen(
+                          //           transaction: transaction,
+                          //         ),
+                          //   ),
+                          // );
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -377,13 +388,9 @@ class SendmoneyFirstScreenState extends State<SendmoneyFirstScreen> {
         throw Exception('User document not found');
       }
 
-      print('=============== DEBUG INFO ===============');
-      print('Current User ID: ${currentUser.uid}');
-
       final userAccounts = List<Map<String, dynamic>>.from(
         userDoc.data()?['userAccounts'] ?? [],
       );
-      print('User Accounts: $userAccounts');
 
       // Convert selected account type to match Firestore field name
       String accountTypeString =
@@ -391,7 +398,6 @@ class SendmoneyFirstScreenState extends State<SendmoneyFirstScreen> {
       if (accountTypeString == 'fixdeposit') {
         accountTypeString = 'fixed_deposit'; // Match the Firestore field name
       }
-      print('Looking for account type: $accountTypeString');
 
       // Find the specific account
       var accountBalance = 0.0;
@@ -404,20 +410,12 @@ class SendmoneyFirstScreenState extends State<SendmoneyFirstScreen> {
             } else if (balanceData is double) {
               accountBalance = balanceData;
             }
-            print('Found balance for $accountTypeString: $accountBalance');
             break;
           }
         }
       }
-
-      print('Final parsed balance: $accountBalance');
-      print('Requested amount: $amount');
-      print('Has sufficient balance? ${accountBalance >= amount}');
-      print('=======================================');
-
       return accountBalance >= amount;
     } catch (e) {
-      print('Error in _checkSufficientBalance: $e');
       throw Exception('Failed to check balance: $e');
     }
   }
@@ -435,6 +433,31 @@ class SendmoneySecondScreen extends StatefulWidget {
 class SendmoneySecondScreenState extends State<SendmoneySecondScreen> {
   bool isConfirmed = false;
   final _transactionService = TransactionService();
+
+  void _close() {
+    Navigator.pop(context);
+  }
+
+  void _navigate(route) {
+    Navigator.of(context).popUntil(ModalRoute.withName(route));
+  }
+
+  void _success(message) {
+    SuccessSnackBar.show(
+      context: context,
+      message: message,
+      backgroundColor: ConstantString.green,
+    );
+  }
+
+  void _error(message){
+    ErrorSnackBar.show(
+      context: context,
+      message: message,
+      backgroundColor: ConstantString.red,
+    );
+  }
+
 
   void _handleSendMoney() async {
     if (!isConfirmed) {
@@ -455,20 +478,15 @@ class SendmoneySecondScreenState extends State<SendmoneySecondScreen> {
       await _transactionService.processTransaction(widget.transaction);
 
       // Hide loading indicator
-      Navigator.pop(context);
+      _close();
 
       // Show success and navigate back to dashboard
-      Navigator.of(context).popUntil(ModalRoute.withName('/dashboard'));
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Transaction successful')));
+      _navigate('/dashboard');
+      _success('Transaction successful.');
     } catch (e) {
       // Hide loading indicator
-      Navigator.pop(context);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Transaction failed: ${e.toString()}')),
-      );
+      _close();
+      _error('Transaction failed: ${e.toString()}');
     }
   }
 
@@ -593,7 +611,7 @@ class SendmoneySecondScreenState extends State<SendmoneySecondScreen> {
                                   isConfirmed = value ?? false;
                                 });
                               },
-                              fillColor: MaterialStateProperty.all(
+                              fillColor: WidgetStateProperty.all(
                                 ConstantString.white,
                               ),
                               checkColor: ConstantString.lightBlue,
