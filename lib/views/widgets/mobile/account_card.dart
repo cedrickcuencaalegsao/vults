@@ -96,11 +96,11 @@ class AccountCardState extends State<AccountCard> {
                         color: Colors.transparent,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(
-                        Icons.qr_code_2_rounded,
-                        size: 90,
-                        color: ConstantString.white,
-                      ),
+                      // child: const Icon(
+                      //   Icons.qr_code_2_rounded,
+                      //   size: 90,
+                      //   color: ConstantString.white,
+                      // ),
                     ),
                   ],
                 ),

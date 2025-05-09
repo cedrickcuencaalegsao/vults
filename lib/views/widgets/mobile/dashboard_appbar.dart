@@ -57,14 +57,14 @@ class DashboardAppBarState extends State<DashboardAppBar> {
           ),
           onPressed: () => _navigate(context, "/sendmoney"),
         ),
-        IconButton(
-          icon: const Icon(
-            Icons.qr_code_2_rounded,
-            size: 30,
-            color: ConstantString.white,
-          ),
-          onPressed: () => _navigate(context, "/scanqr"),
-        ),
+        // IconButton(
+        //   icon: const Icon(
+        //     Icons.qr_code_2_rounded,
+        //     size: 30,
+        //     color: ConstantString.white,
+        //   ),
+        //   onPressed: () => _navigate(context, "/scanqr"),
+        // ),
         IconButton(
           icon: const Icon(
             Icons.notifications_active_outlined,
