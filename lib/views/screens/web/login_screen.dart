@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vults/core/constants/constant_string.dart';
+import 'package:vults/core/service/service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,6 +12,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class LoginScreenState extends State<LoginScreen> {
+  final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -25,24 +29,64 @@ class LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() {
+  void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
+        _emailError = null;
+        _passwordError = null;
       });
 
-      // Simulate network delay
-      Future.delayed(const Duration(seconds: 2), () {
+      try {
+        print('=========== ADMIN LOGIN DEBUG ===========');
+        final email = _emailController.text.trim();
+        final password = _passwordController.text;
+        print('Checking admin account: $email');
+
+        // First check if user exists in Firestore
+        final usersSnapshot =
+            await FirebaseFirestore.instance
+                .collection('users')
+                .where('email', isEqualTo: email)
+                .where(
+                  'password',
+                  isEqualTo: password,
+                ) // Check password in Firestore
+                .get();
+
+        print(
+          'Found ${usersSnapshot.docs.length} users with matching credentials',
+        );
+
+        if (usersSnapshot.docs.isEmpty) {
+          setState(() {
+            _isLoading = false;
+            _emailError = 'Invalid email or password';
+          });
+          return;
+        }
+
+        // Check if user is admin
+        final adminDoc = usersSnapshot.docs.firstWhere(
+          (doc) => doc.data()['isAdmin'] == true,
+          orElse: () => throw Exception('No admin found'),
+        );
+
+        print('Found admin document');
+
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/webApp');
+        }
+      } catch (e) {
+        print('Error: $e');
         setState(() {
           _isLoading = false;
+          _emailError = 'Invalid admin credentials';
         });
-        _nav();
-      });
+      } finally {
+        print('================================');
+      }
     }
-  }
-
-  void _nav() {
-    Navigator.pushNamed(context, '/webApp');
   }
 
   @override

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:vults/core/constants/constant_string.dart';
+import 'package:vults/core/service/service.dart';
 import 'package:vults/views/screens/web/admin_dashboard.dart';
 import 'package:vults/views/screens/web/transaction.dart';
 import 'package:vults/views/screens/web/user.dart';
 import 'package:vults/views/screens/web/analytics_screen.dart';
-
 
 // App Container Widget
 class AppContainer extends StatefulWidget {
@@ -15,6 +15,7 @@ class AppContainer extends StatefulWidget {
 }
 
 class AppContainerState extends State<AppContainer> {
+  final AuthService _authService = AuthService();
   int _selectedIndex = 0;
 
   // Navigation items
@@ -30,6 +31,25 @@ class AppContainerState extends State<AppContainer> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  Future<void> _handleLogout() async {
+    try {
+      await _authService.signOut();
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+      }
+    } catch (e) {
+      print('Logout error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to logout. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -98,7 +118,7 @@ class AppContainerState extends State<AppContainer> {
                 fontFamily: ConstantString.fontFredoka,
               ),
             ),
-            onTap: () {},
+            onTap: _handleLogout,
           ),
         ],
       ),
@@ -166,7 +186,7 @@ class AppContainerState extends State<AppContainer> {
                 fontFamily: ConstantString.fontFredoka,
               ),
             ),
-            onTap: () {},
+            onTap: _handleLogout,
           ),
         ],
       ),
