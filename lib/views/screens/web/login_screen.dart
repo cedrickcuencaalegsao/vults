@@ -106,7 +106,7 @@ class LoginScreenState extends State<LoginScreen> {
                 decoration: BoxDecoration(
                   color: ConstantString.darkBlue,
                   image: DecorationImage(
-                    image: const AssetImage('assets/images/login_bg.jpg'),
+                    image: const AssetImage('assets/icons/vultsicon.png'),
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
                       ConstantString.darkBlue.withOpacity(0.7),

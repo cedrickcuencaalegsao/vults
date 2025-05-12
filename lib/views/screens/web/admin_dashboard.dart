@@ -1,75 +1,193 @@
 import 'package:flutter/material.dart';
 import 'package:vults/core/constants/constant_string.dart';
 import 'package:vults/views/screens/web/app.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 // Dashboard View
 class DashboardView extends BaseView {
   const DashboardView({super.key});
 
-  // Sample data for the dashboard
-  final List<Map<String, dynamic>> _recentTransactions = const [
-    {'id': '#001', 'user': 'John Doe', 'amount': '\$120.00', 'status': 'Completed', 'date': '22 Apr'},
-    {'id': '#002', 'user': 'Jane Smith', 'amount': '\$85.50', 'status': 'Pending', 'date': '21 Apr'},
-    {'id': '#003', 'user': 'Robert Johnson', 'amount': '\$200.00', 'status': 'Failed', 'date': '20 Apr'},
-  ];
+  Future<List<Map<String, dynamic>>> _getRecentTransactions() async {
+    final snapshot =
+        await FirebaseFirestore.instance
+            .collection('transactions')
+            .orderBy('timestamp', descending: true)
+            .limit(3)
+            .get();
 
-  final List<Map<String, dynamic>> _quickStats = const [
-    {'title': 'Total Users', 'value': '1,245', 'icon': Icons.people, 'color': ConstantString.lightBlue},
-    {'title': 'Transactions', 'value': '328', 'icon': Icons.swap_horiz, 'color': ConstantString.green},
-    {'title': 'Revenue', 'value': '\$12,845', 'icon': Icons.attach_money, 'color': ConstantString.orange},
-    {'title': 'Growth', 'value': '+12%', 'icon': Icons.trending_up, 'color': ConstantString.green},
-  ];
+    return Future.wait(
+      snapshot.docs.map((doc) async {
+        final data = doc.data();
+
+        // Get sender details
+        final senderDoc =
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(data['fromUserId'])
+                .get();
+        final senderData = senderDoc.data() ?? {};
+
+        // Get receiver details
+        final receiverDoc =
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(data['toUserId'])
+                .get();
+        final receiverData = receiverDoc.data() ?? {};
+
+        return {
+          'id': doc.id,
+          'user':
+              '${senderData['firstName'] ?? 'Unknown'} → ${receiverData['firstName'] ?? 'Unknown'}',
+          'amount': '₱${(data['amount'] ?? 0).toStringAsFixed(2)}',
+          'status': data['status'] ?? 'Pending',
+          'date': DateFormat(
+            'dd MMM',
+          ).format((data['timestamp'] as Timestamp).toDate()),
+        };
+      }).toList(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          buildSectionHeader('Dashboard Overview'),
-          const SizedBox(height: 20),
-          
-          // Quick Stats
-          GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              childAspectRatio: 1.5,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-            ),
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _quickStats.length,
-            itemBuilder: (context, index) {
-              final stat = _quickStats[index];
-              return _buildStatCard(stat);
-            },
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // Recent Activity and Transactions in a Row
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Recent Transactions
-              Expanded(
-                flex: 3,
-                child: _buildRecentTransactionsCard(),
-              ),
-              
-              const SizedBox(width: 20),
-              
-              // Quick Actions
-              Expanded(
-                flex: 2,
-                child: _buildQuickActionsCard(),
-              ),
-            ],
-          ),
-        ],
-      ),
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('users').snapshots(),
+      builder: (context, userSnapshot) {
+        return StreamBuilder<QuerySnapshot>(
+          stream:
+              FirebaseFirestore.instance.collection('transactions').snapshots(),
+          builder: (context, transactionSnapshot) {
+            if (!userSnapshot.hasData || !transactionSnapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final totalUsers = userSnapshot.data!.docs.length;
+            final totalTransactions = transactionSnapshot.data!.docs.length;
+
+            // Calculate total transaction amount
+            double totalAmount = 0;
+            for (var doc in transactionSnapshot.data!.docs) {
+              totalAmount +=
+                  (doc.data() as Map<String, dynamic>)['amount'] ?? 0;
+            }
+
+            // Sample data for the dashboard
+            final List<Map<String, dynamic>> _recentTransactions = [
+              {
+                'id': '#001',
+                'user': 'John Doe',
+                'amount': '\$120.00',
+                'status': 'Completed',
+                'date': '22 Apr',
+              },
+              {
+                'id': '#002',
+                'user': 'Jane Smith',
+                'amount': '\$85.50',
+                'status': 'Pending',
+                'date': '21 Apr',
+              },
+              {
+                'id': '#003',
+                'user': 'Robert Johnson',
+                'amount': '\$200.00',
+                'status': 'Failed',
+                'date': '20 Apr',
+              },
+            ];
+
+            final List<Map<String, dynamic>> _quickStats = [
+              {
+                'title': 'Total Users',
+                'value': '$totalUsers',
+                'icon': Icons.people,
+                'color': ConstantString.lightBlue,
+              },
+              {
+                'title': 'Transactions',
+                'value': '$totalTransactions',
+                'icon': Icons.swap_horiz,
+                'color': ConstantString.green,
+              },
+              {
+                'title': 'Total Transaction Volume',
+                'value': '₱${totalAmount.toStringAsFixed(2)}',
+                'icon': Icons.attach_money,
+                'color': ConstantString.orange,
+              },
+              {
+                'title': 'Growth',
+                'value': '+12%',
+                'icon': Icons.trending_up,
+                'color': ConstantString.green,
+              },
+            ];
+
+            return FutureBuilder<List<Map<String, dynamic>>>(
+              future: _getRecentTransactions(),
+              builder: (context, recentTransactionsSnapshot) {
+                if (!recentTransactionsSnapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final recentTransactions = recentTransactionsSnapshot.data!;
+
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      buildSectionHeader('Dashboard Overview'),
+                      const SizedBox(height: 20),
+
+                      // Quick Stats
+                      GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 4,
+                              childAspectRatio: 1.5,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                            ),
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _quickStats.length,
+                        itemBuilder: (context, index) {
+                          final stat = _quickStats[index];
+                          return _buildStatCard(stat);
+                        },
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Recent Activity and Transactions in a Row
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Recent Transactions
+                          Expanded(
+                            flex: 3,
+                            child: _buildRecentTransactionsCard(
+                              recentTransactions,
+                            ),
+                          ),
+
+                          const SizedBox(width: 20),
+
+                          // Quick Actions
+                          Expanded(flex: 2, child: _buildQuickActionsCard()),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 
@@ -104,9 +222,7 @@ class DashboardView extends BaseView {
                     color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  child: const Center(
-                    child: Icon(Icons.more_horiz, size: 18),
-                  ),
+                  child: const Center(child: Icon(Icons.more_horiz, size: 18)),
                 ),
               ],
             ),
@@ -134,7 +250,9 @@ class DashboardView extends BaseView {
     );
   }
 
-  Widget _buildRecentTransactionsCard() {
+  Widget _buildRecentTransactionsCard(
+    List<Map<String, dynamic>> recentTransactions,
+  ) {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -177,9 +295,9 @@ class DashboardView extends BaseView {
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: _recentTransactions.length,
+              itemCount: recentTransactions.length,
               itemBuilder: (context, index) {
-                final txn = _recentTransactions[index];
+                final txn = recentTransactions[index];
                 return ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Container(
@@ -221,7 +339,10 @@ class DashboardView extends BaseView {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: getStatusColor(txn['status']).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(10),
@@ -248,10 +369,26 @@ class DashboardView extends BaseView {
 
   Widget _buildQuickActionsCard() {
     final List<Map<String, dynamic>> _quickActions = [
-      {'title': 'Add User', 'icon': Icons.person_add, 'color': ConstantString.lightBlue},
-      {'title': 'New Transaction', 'icon': Icons.add_card, 'color': ConstantString.green},
-      {'title': 'Generate Report', 'icon': Icons.summarize, 'color': ConstantString.orange},
-      {'title': 'Support Tickets', 'icon': Icons.help_center, 'color': ConstantString.grey},
+      {
+        'title': 'Add User',
+        'icon': Icons.person_add,
+        'color': ConstantString.lightBlue,
+      },
+      {
+        'title': 'New Transaction',
+        'icon': Icons.add_card,
+        'color': ConstantString.green,
+      },
+      {
+        'title': 'Generate Report',
+        'icon': Icons.summarize,
+        'color': ConstantString.orange,
+      },
+      {
+        'title': 'Support Tickets',
+        'icon': Icons.help_center,
+        'color': ConstantString.grey,
+      },
     ];
 
     return Card(
@@ -314,9 +451,7 @@ class DashboardView extends BaseView {
               ),
               child: Text(
                 'View All Actions',
-                style: TextStyle(
-                  fontFamily: ConstantString.fontFredoka,
-                ),
+                style: TextStyle(fontFamily: ConstantString.fontFredoka),
               ),
             ),
           ],

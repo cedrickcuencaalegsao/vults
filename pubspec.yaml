@@ -20,6 +20,7 @@ dependencies:
   auto_size_text: ^3.0.0
   mobile_scanner: ^3.5.0
   device_info_plus: ^9.1.2
+  fl_chart: ^0.65.0
 
 dev_dependencies:
   flutter_test:

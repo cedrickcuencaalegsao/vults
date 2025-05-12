@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:vults/core/constants/constant_string.dart';
 import 'package:vults/views/screens/web/app.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 // Transactions View
 class TransactionsView extends BaseView {
@@ -8,23 +10,38 @@ class TransactionsView extends BaseView {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          buildSectionHeader('Transactions'),
-          const SizedBox(height: 20),
+    return StreamBuilder<QuerySnapshot>(
+      stream:
+          FirebaseFirestore.instance
+              .collection('transactions')
+              .orderBy('timestamp', descending: true)
+              .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          // Search and filter row
-          _buildSearchAndFilterRow(),
+        final transactions = snapshot.data!.docs;
 
-          const SizedBox(height: 20),
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              buildSectionHeader('Transactions'),
+              const SizedBox(height: 20),
 
-          // Transactions table
-          _buildTransactionsTable(),
-        ],
-      ),
+              // Search and filter row
+              _buildSearchAndFilterRow(),
+
+              const SizedBox(height: 20),
+
+              // Transactions table
+              _buildTransactionsTable(transactions),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -68,7 +85,10 @@ class TransactionsView extends BaseView {
     );
   }
 
-  Widget _buildTransactionsTable() {
+  Widget _buildTransactionsTable(List<DocumentSnapshot> transactions) {
+    // Add debug print before return statement
+    debugPrint('Total transactions: ${transactions.length}');
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -102,7 +122,17 @@ class TransactionsView extends BaseView {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      'User',
+                      'From',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontFamily: ConstantString.fontFredoka,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      'To',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontFamily: ConstantString.fontFredoka,
@@ -127,106 +157,134 @@ class TransactionsView extends BaseView {
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: Text(
-                      'Status',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontFamily: ConstantString.fontFredoka,
-                      ),
-                    ),
-                  ),
+                  // Expanded(
+                  //   child: Text(
+                  //     'Status',
+                  //     style: TextStyle(
+                  //       fontWeight: FontWeight.bold,
+                  //       fontFamily: ConstantString.fontFredoka,
+                  //     ),
+                  //   ),
+                  // ),
                   const SizedBox(width: 40),
                 ],
               ),
             ),
 
             // Table rows
-            for (int i = 0; i < 5; i++)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 16,
-                ),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: Colors.grey.shade200),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 40,
-                      child: Checkbox(value: false, onChanged: (value) {}),
+            for (var transaction in transactions)
+              FutureBuilder<List<Map<String, dynamic>>>(
+                future: Future.wait([
+                  _getUserDetails(_getSenderId(transaction)),
+                  _getUserDetails(_getReceiverId(transaction)),
+                ]),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const SizedBox.shrink();
+                  }
+
+                  final transactionData =
+                      transaction.data() as Map<String, dynamic>;
+                  print('Full transaction data: $transactionData');
+
+                  final senderDetails = snapshot.data![0];
+                  final receiverDetails = snapshot.data![1];
+
+                  // Add these lines to define timestamp and amount
+                  final timestamp = _getTimestamp(transactionData);
+                  final amount = _getAmount(transactionData);
+
+                  final fromUserId = _getSenderId(transaction);
+                  final toUserId = _getReceiverId(transaction);
+
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 16,
                     ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        '#TXN-${1000 + i}',
-                        style: TextStyle(
-                          fontFamily: ConstantString.fontFredoka,
-                        ),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey.shade200),
                       ),
                     ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        'User ${['John Doe', 'Jane Smith', 'Robert Johnson'][i % 3]}',
-                        style: TextStyle(
-                          fontFamily: ConstantString.fontFredoka,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        '${20 + i} Apr 2025',
-                        style: TextStyle(
-                          fontFamily: ConstantString.fontFredoka,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        '\$${(i + 1) * 75}.00',
-                        style: TextStyle(
-                          fontFamily: ConstantString.fontFredoka,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: getStatusColor(
-                            ['Completed', 'Pending', 'Failed'][i % 3],
-                          ).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          ['Completed', 'Pending', 'Failed'][i % 3],
-                          style: TextStyle(
-                            fontFamily: ConstantString.fontFredoka,
-                            color: getStatusColor(
-                              ['Completed', 'Pending', 'Failed'][i % 3],
+                    child: Row(
+                      children: [
+                        // SizedBox(
+                        //   width: 40,
+                        //   child: Checkbox(value: false, onChanged: (value) {}),
+                        // ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            transaction.id,
+                            style: TextStyle(
+                              fontFamily: ConstantString.fontFredoka,
                             ),
-                            fontSize: 12,
                           ),
                         ),
-                      ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            fromUserId.isEmpty ? 'Unknown' : fromUserId,
+                            style: TextStyle(
+                              fontFamily: ConstantString.fontFredoka,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            toUserId.isEmpty ? 'Unknown' : toUserId,
+                            style: TextStyle(
+                              fontFamily: ConstantString.fontFredoka,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            timestamp != null
+                                ? DateFormat(
+                                  'dd MMM yyyy',
+                                ).format(timestamp.toDate())
+                                : 'No date',
+                            style: TextStyle(
+                              fontFamily: ConstantString.fontFredoka,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            '₱${amount.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontFamily: ConstantString.fontFredoka,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        // Expanded(
+                        //   child: Container(
+                        //     padding: const EdgeInsets.symmetric(
+                        //       horizontal: 8,
+                        //       vertical: 2,
+                        //     ),
+                        //     decoration: BoxDecoration(
+                        //       color: getStatusColor(status).withOpacity(0.1),
+                        //       borderRadius: BorderRadius.circular(10),
+                        //     ),
+                        //     child: Text(
+                        //       status,
+                        //       style: TextStyle(
+                        //         fontFamily: ConstantString.fontFredoka,
+                        //         color: getStatusColor(status),
+                        //         fontSize: 12,
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
+                      ],
                     ),
-                    // SizedBox(
-                    //   width: 40,
-                    //   child: IconButton(
-                    //     icon: const Icon(Icons.more_vert),
-                    //     onPressed: () => _showTransactionOptions(context),
-                    //   ),
-                    // ),
-                  ],
-                ),
+                  );
+                },
               ),
 
             // Pagination
@@ -328,5 +386,71 @@ class TransactionsView extends BaseView {
         ],
       ),
     );
+  }
+
+  // Helper methods to handle different field names
+  String _getSenderId(DocumentSnapshot transaction) {
+    final data = transaction.data() as Map<String, dynamic>;
+    print('Transaction data for sender: $data'); // Debug print
+    return data['fromUserId'] ?? // Try this field first
+        data['senderUid'] ??
+        data['senderId'] ??
+        data['uid'] ??
+        '';
+  }
+
+  // Add this helper method to get receiver ID
+  String _getReceiverId(DocumentSnapshot transaction) {
+    final data = transaction.data() as Map<String, dynamic>;
+    print('Transaction data for receiver: $data'); // Debug print
+    return data['toUserId'] ?? // Try this field first
+        data['receiverUid'] ??
+        data['receiverId'] ??
+        '';
+  }
+
+  double _getAmount(Map<String, dynamic> data) {
+    return (data['amount'] ?? data['transactionAmount'] ?? data['value'] ?? 0.0)
+        .toDouble();
+  }
+
+  String _getStatus(Map<String, dynamic> data) {
+    return data['status'] ??
+        data['transactionStatus'] ??
+        data['state'] ??
+        'Pending';
+  }
+
+  Timestamp? _getTimestamp(Map<String, dynamic> data) {
+    return data['timestamp'] ?? data['date'] ?? data['createdAt'] ?? null;
+  }
+
+  // Update the user details fetching method
+  Future<Map<String, dynamic>> _getUserDetails(String userId) async {
+    try {
+      print('Fetching user details for ID: $userId'); // Debug print
+      if (userId.isEmpty) {
+        print('User ID is empty'); // Debug print
+        return {'firstName': 'Unknown', 'lastName': ''};
+      }
+
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(userId)
+              .get();
+
+      if (!doc.exists) {
+        print('No user document found for ID: $userId'); // Debug print
+        return {'firstName': 'Unknown', 'lastName': ''};
+      }
+
+      final userData = doc.data() ?? {};
+      print('Found user data: $userData'); // Debug print
+      return userData;
+    } catch (e) {
+      print('Error fetching user details: $e');
+      return {'firstName': 'Unknown', 'lastName': ''};
+    }
   }
 }

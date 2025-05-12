@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vults/core/constants/constant_string.dart';
 import 'package:vults/views/screens/web/app.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 // User Model
 class User {
@@ -63,66 +64,76 @@ class UserManagementContent extends StatefulWidget {
 }
 
 class _UserManagementContentState extends State<UserManagementContent> {
-  final List<User> _users = [
-    User(
-      id: '001',
-      name: 'John Doe',
-      email: 'john@example.com',
-      role: 'Admin',
-      status: 'Active',
-      isVerified: true,
-      accountTypes: ['Savings', 'Fixed Deposit'],
-    ),
-    User(
-      id: '002',
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      role: 'User',
-      status: 'Active',
-      isVerified: false,
-      accountTypes: ['Checking'],
-    ),
-    User(
-      id: '003',
-      name: 'Robert Johnson',
-      email: 'robert@example.com',
-      role: 'User',
-      status: 'Inactive',
-      isVerified: false,
-      accountTypes: ['Business'],
-    ),
-    User(
-      id: '004',
-      name: 'Emily Davis',
-      email: 'emily@example.com',
-      role: 'User',
-      status: 'Active',
-      isVerified: true,
-      accountTypes: ['Savings', 'Business'],
-    ),
-    User(
-      id: '005',
-      name: 'Michael Wilson',
-      email: 'michael@example.com',
-      role: 'User',
-      status: 'Pending',
-      isVerified: false,
-      accountTypes: ['Checking'],
-    ),
-  ];
-
+  List<User> _users = [];
   List<User> _filteredUsers = [];
   String _searchQuery = '';
   String _statusFilter = 'All';
   String _verificationFilter = 'All';
 
-  final List<String> _statusOptions = ['All', 'Active', 'Inactive', 'Pending'];
+  // Update status options to match database values
+  final List<String> _statusOptions = ['All', 'active', 'inactive', 'pending'];
   final List<String> _verificationOptions = ['All', 'Verified', 'Unverified'];
 
   @override
   void initState() {
     super.initState();
-    _filteredUsers = List.from(_users);
+    _loadUsers();
+  }
+
+  Future<void> _loadUsers() async {
+    try {
+      // First get regular users
+      final usersSnapshot =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .where('isAdmin', isEqualTo: false)
+              .get();
+
+      // Then get the specific admin user
+      final adminDoc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc('NYTIwHlhWEh0r93qZKY6jgat5uu1')
+              .get();
+
+      setState(() {
+        _users = [
+          // Add admin user first
+          if (adminDoc.exists)
+            User(
+              id: adminDoc.id,
+              name:
+                  '${adminDoc.data()?['firstName'] ?? ''} ${adminDoc.data()?['lastName'] ?? ''}'
+                      .trim(),
+              email: adminDoc.data()?['email'] ?? '',
+              role: 'Admin',
+              status: (adminDoc.data()?['status'] ?? 'active').toLowerCase(),
+              isVerified: adminDoc.data()?['isVerified'] ?? true,
+              accountTypes: List<String>.from(
+                adminDoc.data()?['accountTypes'] ?? [],
+              ),
+            ),
+          // Then add regular users
+          ...usersSnapshot.docs.map((doc) {
+            final data = doc.data();
+            return User(
+              id: doc.id,
+              name:
+                  '${data['firstName'] ?? ''} ${data['lastName'] ?? ''}'.trim(),
+              email: data['email'] ?? '',
+              role: data['isAdmin'] == true ? 'Admin' : 'User',
+              status: (data['status'] ?? 'pending').toLowerCase(),
+              isVerified: data['isVerified'] ?? false,
+              accountTypes: List<String>.from(data['accountTypes'] ?? []),
+            );
+          }).toList(),
+        ];
+
+        _filteredUsers = List.from(_users);
+      });
+    } catch (e) {
+      print('Error loading users: $e');
+    }
   }
 
   void _filterUsers() {
@@ -169,41 +180,69 @@ class _UserManagementContentState extends State<UserManagementContent> {
     );
   }
 
-  void _toggleVerification(User user) {
-    setState(() {
-      final index = _users.indexWhere((u) => u.id == user.id);
-      if (index != -1) {
-        _users[index] = user.copyWith(isVerified: !user.isVerified);
-        _filterUsers();
-      }
-    });
+  void _toggleVerification(User user) async {
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(user.id).update({
+        'isVerified': !user.isVerified,
+      });
+
+      setState(() {
+        final index = _users.indexWhere((u) => u.id == user.id);
+        if (index != -1) {
+          _users[index] = user.copyWith(isVerified: !user.isVerified);
+          _filterUsers();
+        }
+      });
+    } catch (e) {
+      print('Error toggling verification: $e');
+    }
   }
 
-  void _changeStatus(User user, String newStatus) {
-    setState(() {
-      final index = _users.indexWhere((u) => u.id == user.id);
-      if (index != -1) {
-        _users[index] = user.copyWith(status: newStatus);
-        _filterUsers();
-      }
-    });
+  void _changeStatus(User user, String newStatus) async {
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(user.id).update({
+        'status': newStatus,
+      });
+
+      setState(() {
+        final index = _users.indexWhere((u) => u.id == user.id);
+        if (index != -1) {
+          _users[index] = user.copyWith(status: newStatus);
+          _filterUsers();
+        }
+      });
+    } catch (e) {
+      print('Error changing status: $e');
+    }
   }
 
   void _manageAccountTypes(User user) {
     showDialog(
       context: context,
-      builder: (context) => AccountTypesDialog(
-        user: user,
-        onSave: (updatedUser) {
-          setState(() {
-            final index = _users.indexWhere((u) => u.id == updatedUser.id);
-            if (index != -1) {
-              _users[index] = updatedUser;
-              _filterUsers();
-            }
-          });
-        },
-      ),
+      builder:
+          (context) => AccountTypesDialog(
+            user: user,
+            onSave: (updatedUser) async {
+              try {
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user.id)
+                    .update({'accountTypes': updatedUser.accountTypes});
+
+                setState(() {
+                  final index = _users.indexWhere(
+                    (u) => u.id == updatedUser.id,
+                  );
+                  if (index != -1) {
+                    _users[index] = updatedUser;
+                    _filterUsers();
+                  }
+                });
+              } catch (e) {
+                print('Error updating account types: $e');
+              }
+            },
+          ),
     );
   }
 
@@ -355,30 +394,35 @@ class _UserManagementContentState extends State<UserManagementContent> {
                       value: user.status,
                       underline: Container(),
                       icon: const Icon(Icons.arrow_drop_down, size: 16),
-                      items: ['Active', 'Inactive', 'Pending'].map((status) {
-                        return DropdownMenuItem<String>(
-                          value: status,
-                          child: Row(
-                            children: [
-                              Icon(
-                                status == 'Active'
-                                    ? Icons.check_circle
-                                    : status == 'Inactive'
+                      items:
+                          ['active', 'inactive', 'pending'].map((status) {
+                            return DropdownMenuItem<String>(
+                              value: status,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    status == 'active'
+                                        ? Icons.check_circle
+                                        : status == 'inactive'
                                         ? Icons.cancel
                                         : Icons.pending,
-                                size: 16,
-                                color: status == 'Active'
-                                    ? Colors.green
-                                    : status == 'Inactive'
-                                        ? Colors.red
-                                        : Colors.orange,
+                                    size: 16,
+                                    color:
+                                        status == 'active'
+                                            ? Colors.green
+                                            : status == 'inactive'
+                                            ? Colors.red
+                                            : Colors.orange,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    status[0].toUpperCase() +
+                                        status.substring(1),
+                                  ), // Capitalize for display
+                                ],
                               ),
-                              const SizedBox(width: 8),
-                              Text(status),
-                            ],
-                          ),
-                        );
-                      }).toList(),
+                            );
+                          }).toList(),
                       onChanged: (String? value) {
                         if (value != null) {
                           _changeStatus(user, value);
@@ -386,10 +430,12 @@ class _UserManagementContentState extends State<UserManagementContent> {
                       },
                     ),
                   ),
-                  DataCell(Icon(
-                    user.isVerified ? Icons.check_circle : Icons.cancel,
-                    color: user.isVerified ? Colors.green : Colors.red,
-                  )),
+                  DataCell(
+                    Icon(
+                      user.isVerified ? Icons.check_circle : Icons.cancel,
+                      color: user.isVerified ? Colors.green : Colors.red,
+                    ),
+                  ),
                   DataCell(Text(user.accountTypes.join(', '))),
                   DataCell(
                     Row(
@@ -743,15 +789,16 @@ class _AccountTypesDialogState extends State<AccountTypesDialog> {
       title: Text('Manage Account Types for '),
       content: Column(
         mainAxisSize: MainAxisSize.min,
-        children: _availableAccountTypes.map((accountType) {
-          return CheckboxListTile(
-            title: Text(accountType),
-            value: _selectedAccountTypes.contains(accountType),
-            onChanged: (bool? value) {
-              _toggleAccountType(accountType);
-            },
-          );
-        }).toList(),
+        children:
+            _availableAccountTypes.map((accountType) {
+              return CheckboxListTile(
+                title: Text(accountType),
+                value: _selectedAccountTypes.contains(accountType),
+                onChanged: (bool? value) {
+                  _toggleAccountType(accountType);
+                },
+              );
+            }).toList(),
       ),
       actions: [
         TextButton(
