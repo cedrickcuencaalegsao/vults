@@ -86,9 +86,6 @@ class TransactionsView extends BaseView {
   }
 
   Widget _buildTransactionsTable(List<DocumentSnapshot> transactions) {
-    // Add debug print before return statement
-    debugPrint('Total transactions: ${transactions.length}');
-
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -108,7 +105,6 @@ class TransactionsView extends BaseView {
               ),
               child: Row(
                 children: [
-                  const SizedBox(width: 40),
                   Expanded(
                     flex: 2,
                     child: Text(
@@ -146,6 +142,7 @@ class TransactionsView extends BaseView {
                         fontWeight: FontWeight.bold,
                         fontFamily: ConstantString.fontFredoka,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                   Expanded(
@@ -155,137 +152,97 @@ class TransactionsView extends BaseView {
                         fontWeight: FontWeight.bold,
                         fontFamily: ConstantString.fontFredoka,
                       ),
+                      textAlign: TextAlign.left,
                     ),
                   ),
-                  // Expanded(
-                  //   child: Text(
-                  //     'Status',
-                  //     style: TextStyle(
-                  //       fontWeight: FontWeight.bold,
-                  //       fontFamily: ConstantString.fontFredoka,
-                  //     ),
-                  //   ),
-                  // ),
-                  const SizedBox(width: 40),
                 ],
               ),
             ),
 
             // Table rows
-            for (var transaction in transactions)
-              FutureBuilder<List<Map<String, dynamic>>>(
-                future: Future.wait([
-                  _getUserDetails(_getSenderId(transaction)),
-                  _getUserDetails(_getReceiverId(transaction)),
-                ]),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const SizedBox.shrink();
-                  }
+            ...transactions.map((transaction) {
+              final data = transaction.data() as Map<String, dynamic>;
+              final timestamp = data['timestamp'] as Timestamp?;
+              final amount = (data['amount'] as num?)?.toDouble() ?? 0.0;
 
-                  final transactionData =
-                      transaction.data() as Map<String, dynamic>;
-                  print('Full transaction data: $transactionData');
+              // Get the correct field names from transaction data
+              final fromAccountId =
+                  data['fromAccountId'] ?? ''; // Changed from fromId/fromUserId
+              final toAccountId =
+                  data['toAccountId'] ?? ''; // Changed from toId/toUserId
 
-                  final senderDetails = snapshot.data![0];
-                  final receiverDetails = snapshot.data![1];
-
-                  // Add these lines to define timestamp and amount
-                  final timestamp = _getTimestamp(transactionData);
-                  final amount = _getAmount(transactionData);
-
-                  final fromUserId = _getSenderId(transaction);
-                  final toUserId = _getReceiverId(transaction);
-
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 12,
-                      horizontal: 16,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: Colors.grey.shade200),
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 16,
+                ),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade200),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        transaction.id,
+                        style: TextStyle(
+                          fontFamily: ConstantString.fontFredoka,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        // SizedBox(
-                        //   width: 40,
-                        //   child: Checkbox(value: false, onChanged: (value) {}),
-                        // ),
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            transaction.id,
-                            style: TextStyle(
-                              fontFamily: ConstantString.fontFredoka,
-                            ),
-                          ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        fromAccountId,
+                        style: TextStyle(
+                          fontFamily: ConstantString.fontFredoka,
                         ),
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            fromUserId.isEmpty ? 'Unknown' : fromUserId,
-                            style: TextStyle(
-                              fontFamily: ConstantString.fontFredoka,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            toUserId.isEmpty ? 'Unknown' : toUserId,
-                            style: TextStyle(
-                              fontFamily: ConstantString.fontFredoka,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            timestamp != null
-                                ? DateFormat(
-                                  'dd MMM yyyy',
-                                ).format(timestamp.toDate())
-                                : 'No date',
-                            style: TextStyle(
-                              fontFamily: ConstantString.fontFredoka,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            '₱${amount.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontFamily: ConstantString.fontFredoka,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        // Expanded(
-                        //   child: Container(
-                        //     padding: const EdgeInsets.symmetric(
-                        //       horizontal: 8,
-                        //       vertical: 2,
-                        //     ),
-                        //     decoration: BoxDecoration(
-                        //       color: getStatusColor(status).withOpacity(0.1),
-                        //       borderRadius: BorderRadius.circular(10),
-                        //     ),
-                        //     child: Text(
-                        //       status,
-                        //       style: TextStyle(
-                        //         fontFamily: ConstantString.fontFredoka,
-                        //         color: getStatusColor(status),
-                        //         fontSize: 12,
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
-                      ],
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  );
-                },
-              ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        toAccountId,
+                        style: TextStyle(
+                          fontFamily: ConstantString.fontFredoka,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        timestamp != null
+                            ? DateFormat(
+                              'dd MMM yyyy',
+                            ).format(timestamp.toDate())
+                            : 'No date',
+                        style: TextStyle(
+                          fontFamily: ConstantString.fontFredoka,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        alignment:
+                            Alignment.centerLeft, // Change to left alignment
+                        child: Text(
+                          '₱ ${amount.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            fontFamily: ConstantString.fontFredoka,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
 
             // Pagination
             _buildPagination(),
@@ -391,22 +348,13 @@ class TransactionsView extends BaseView {
   // Helper methods to handle different field names
   String _getSenderId(DocumentSnapshot transaction) {
     final data = transaction.data() as Map<String, dynamic>;
-    print('Transaction data for sender: $data'); // Debug print
-    return data['fromUserId'] ?? // Try this field first
-        data['senderUid'] ??
-        data['senderId'] ??
-        data['uid'] ??
-        '';
+    return data['fromAccountId'] ?? ''; // Just get fromUserId directly
   }
 
-  // Add this helper method to get receiver ID
+  // Update the _getReceiverId method to properly get toUserId
   String _getReceiverId(DocumentSnapshot transaction) {
     final data = transaction.data() as Map<String, dynamic>;
-    print('Transaction data for receiver: $data'); // Debug print
-    return data['toUserId'] ?? // Try this field first
-        data['receiverUid'] ??
-        data['receiverId'] ??
-        '';
+    return data['toAccountId'] ?? ''; // Just get toUserId directly
   }
 
   double _getAmount(Map<String, dynamic> data) {
@@ -431,7 +379,7 @@ class TransactionsView extends BaseView {
       print('Fetching user details for ID: $userId'); // Debug print
       if (userId.isEmpty) {
         print('User ID is empty'); // Debug print
-        return {'firstName': 'Unknown', 'lastName': ''};
+        return {'firstName': 'System', 'lastName': 'Transfer'};
       }
 
       final doc =
@@ -442,15 +390,18 @@ class TransactionsView extends BaseView {
 
       if (!doc.exists) {
         print('No user document found for ID: $userId'); // Debug print
-        return {'firstName': 'Unknown', 'lastName': ''};
+        return {'firstName': 'Deleted', 'lastName': 'User'};
       }
 
       final userData = doc.data() ?? {};
       print('Found user data: $userData'); // Debug print
-      return userData;
+      return {
+        'firstName': userData['firstName'] ?? 'N/A',
+        'lastName': userData['lastName'] ?? '',
+      };
     } catch (e) {
       print('Error fetching user details: $e');
-      return {'firstName': 'Unknown', 'lastName': ''};
+      return {'firstName': 'Error', 'lastName': 'Loading'};
     }
   }
 }

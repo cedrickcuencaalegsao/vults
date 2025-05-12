@@ -3,6 +3,8 @@ import 'package:vults/core/constants/constant_string.dart';
 import 'package:vults/views/screens/web/app.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:vults/views/screens/web/transaction.dart';
+import 'package:vults/views/screens/web/user.dart';
 
 // Dashboard View
 class DashboardView extends BaseView {
@@ -20,26 +22,35 @@ class DashboardView extends BaseView {
       snapshot.docs.map((doc) async {
         final data = doc.data();
 
-        // Get sender details
+        // Get sender details - check both possible field names
+        final fromId = data['fromAccountId'] ?? data['FromAccount'] ?? '';
         final senderDoc =
             await FirebaseFirestore.instance
                 .collection('users')
-                .doc(data['fromUserId'])
+                .doc(fromId)
                 .get();
         final senderData = senderDoc.data() ?? {};
 
-        // Get receiver details
+        // Get receiver details - check both possible field names
+        final toId = data['toAccountId'] ?? data['ToAccount'] ?? '';
         final receiverDoc =
             await FirebaseFirestore.instance
                 .collection('users')
-                .doc(data['toUserId'])
+                .doc(toId)
                 .get();
         final receiverData = receiverDoc.data() ?? {};
 
+        // Get names from user data
+        final senderName =
+            '${senderData['firstName'] ?? ''} ${senderData['lastName'] ?? ''}'
+                .trim();
+        final receiverName =
+            '${receiverData['firstName'] ?? ''} ${receiverData['lastName'] ?? ''}'
+                .trim();
+
         return {
           'id': doc.id,
-          'user':
-              '${senderData['firstName'] ?? 'Unknown'} → ${receiverData['firstName'] ?? 'Unknown'}',
+          'user': '$senderName → $receiverName',
           'amount': '₱${(data['amount'] ?? 0).toStringAsFixed(2)}',
           'status': data['status'] ?? 'Pending',
           'date': DateFormat(
@@ -113,7 +124,7 @@ class DashboardView extends BaseView {
               },
               {
                 'title': 'Total Transaction Volume',
-                'value': '₱${totalAmount.toStringAsFixed(2)}',
+                'value': '₱ ${totalAmount.toStringAsFixed(2)}',
                 'icon': Icons.attach_money,
                 'color': ConstantString.orange,
               },
@@ -139,6 +150,7 @@ class DashboardView extends BaseView {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      _buildWelcomeHeader(), // Add this line
                       buildSectionHeader('Dashboard Overview'),
                       const SizedBox(height: 20),
 
@@ -171,6 +183,7 @@ class DashboardView extends BaseView {
                             flex: 3,
                             child: _buildRecentTransactionsCard(
                               recentTransactions,
+                              context, // Pass the context from build method
                             ),
                           ),
 
@@ -188,6 +201,64 @@ class DashboardView extends BaseView {
           },
         );
       },
+    );
+  }
+
+  Widget _buildWelcomeHeader() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Welcome back, Admin!',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: ConstantString.fontFredokaOne,
+                  color: ConstantString.darkBlue,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Here\'s what\'s happening with your system today.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                  fontFamily: ConstantString.fontFredoka,
+                ),
+              ),
+            ],
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: ConstantString.lightBlue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.access_time,
+                  size: 20,
+                  color: ConstantString.lightBlue,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Last updated: Just now',
+                  style: TextStyle(
+                    color: ConstantString.lightBlue,
+                    fontFamily: ConstantString.fontFredoka,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -252,6 +323,7 @@ class DashboardView extends BaseView {
 
   Widget _buildRecentTransactionsCard(
     List<Map<String, dynamic>> recentTransactions,
+    BuildContext context, // Add context parameter
   ) {
     return Card(
       elevation: 0,
@@ -278,7 +350,13 @@ class DashboardView extends BaseView {
                 ),
                 TextButton(
                   onPressed: () {
-                    // Navigate to transactions view
+                    final appState =
+                        context.findAncestorStateOfType<AppContainerState>();
+                    if (appState != null) {
+                      appState.updateSelectedIndex(
+                        1,
+                      ); // Use the public method instead
+                    }
                   },
                   child: Text(
                     'See All',
@@ -438,7 +516,30 @@ class DashboardView extends BaseView {
                     ),
                   ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {},
+                  onTap: () {
+                    final appState =
+                        context.findAncestorStateOfType<AppContainerState>();
+                    if (appState != null) {
+                      switch (action['title']) {
+                        case 'Add User':
+                          appState.updateSelectedIndex(
+                            2,
+                          ); // Index 2 is for UsersView
+                          break;
+                        case 'New Transaction':
+                          appState.updateSelectedIndex(
+                            1,
+                          ); // Index 1 is for TransactionsView
+                          break;
+                        case 'Generate Report':
+                          _showMaintenanceModal(context, 'Report Generation');
+                          break;
+                        case 'Support Tickets':
+                          _showMaintenanceModal(context, 'Support Tickets');
+                          break;
+                      }
+                    }
+                  },
                 );
               },
             ),
@@ -457,6 +558,51 @@ class DashboardView extends BaseView {
           ],
         ),
       ),
+    );
+  }
+
+  void _showMaintenanceModal(BuildContext context, String feature) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.construction, color: ConstantString.orange),
+              const SizedBox(width: 10),
+              Text(
+                'Under Development',
+                style: TextStyle(
+                  fontFamily: ConstantString.fontFredoka,
+                  color: ConstantString.darkBlue,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            '$feature feature is coming soon!\nCurrently in development.',
+            style: TextStyle(
+              fontFamily: ConstantString.fontFredoka,
+              color: ConstantString.grey,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'OK',
+                style: TextStyle(
+                  fontFamily: ConstantString.fontFredoka,
+                  color: ConstantString.lightBlue,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

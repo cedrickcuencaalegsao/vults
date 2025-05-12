@@ -33,6 +33,12 @@ class AppContainerState extends State<AppContainer> {
     });
   }
 
+  void updateSelectedIndex(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   Future<void> _handleLogout() async {
     try {
       await _authService.signOut();
@@ -84,16 +90,32 @@ class AppContainerState extends State<AppContainer> {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: Center(
-              child: Text(
-                'Admin Panel',
-                style: TextStyle(
-                  fontFamily: ConstantString.fontFredokaOne,
-                  fontSize: 18,
-                  color: ConstantString.darkBlue,
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/icons/vultsicon.png',
+                  height: 40,
+                  width: 40,
+                  fit: BoxFit.contain,
                 ),
-              ),
+                const SizedBox(height: 8),
+                Text(
+                  'Admin Panel',
+                  style: TextStyle(
+                    fontFamily: ConstantString.fontFredokaOne,
+                    fontSize: 18,
+                    color: ConstantString.darkBlue,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(
@@ -109,16 +131,21 @@ class AppContainerState extends State<AppContainer> {
             ),
           ),
           const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.exit_to_app, color: Colors.red),
-            title: Text(
-              'Logout',
-              style: TextStyle(
-                color: Colors.red,
-                fontFamily: ConstantString.fontFredoka,
-              ),
+          Container(
+            decoration: BoxDecoration(
+              color: ConstantString.darkBlue.withOpacity(0.02),
             ),
-            onTap: _handleLogout,
+            child: ListTile(
+              leading: const Icon(Icons.exit_to_app, color: Colors.red),
+              title: Text(
+                'Logout',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontFamily: ConstantString.fontFredoka,
+                ),
+              ),
+              onTap: _handleLogout,
+            ),
           ),
         ],
       ),
@@ -131,23 +158,47 @@ class AppContainerState extends State<AppContainer> {
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: BoxDecoration(color: ConstantString.darkBlue),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+            ),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(
+                  children: [
+                    Image.asset(
+                      'assets/icons/vultsicon.png',
+                      height: 32,
+                      width: 32,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Vults',
+                      style: TextStyle(
+                        color: ConstantString.darkBlue,
+                        fontSize: 24,
+                        fontFamily: ConstantString.fontFredokaOne,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
                 const CircleAvatar(
                   backgroundColor: Colors.white,
-                  radius: 30,
+                  radius: 24,
                   child: Text(
                     'A',
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: ConstantString.darkBlue,
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 Text(
                   'Admin User',
                   style: TextStyle(
@@ -286,7 +337,7 @@ abstract class BaseView extends StatelessWidget {
             children: [
               OutlinedButton.icon(
                 icon: const Icon(Icons.calendar_today, size: 16),
-                label: Text('April 2025'),
+                label: Text('May 2025'),
                 onPressed: () {},
                 style: OutlinedButton.styleFrom(
                   foregroundColor: ConstantString.darkBlue,

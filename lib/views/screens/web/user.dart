@@ -250,28 +250,44 @@ class _UserManagementContentState extends State<UserManagementContent> {
   Widget build(BuildContext context) {
     final bool isMobile = MediaQuery.of(context).size.width < 800;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20.0),
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: 76.0,
+      ), // Remove padding from outer container
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          widget.baseView.buildSectionHeader('User Management'),
-          const SizedBox(height: 20),
-
-          // Search and filters
-          _buildSearchAndFilters(isMobile),
-          const SizedBox(height: 16),
-
-          // Users table
-          Card(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-              side: BorderSide(color: Colors.grey.shade200),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20.0,
+            ), // Add horizontal padding only
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                widget.baseView.buildSectionHeader('User Management'),
+                const SizedBox(height: 20),
+                _buildSearchAndFilters(isMobile),
+                const SizedBox(height: 16),
+              ],
             ),
+          ),
+          Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: isMobile ? _buildMobileUserList() : _buildUsersDataTable(),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(color: Colors.grey.shade200),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child:
+                      isMobile
+                          ? _buildMobileUserList()
+                          : _buildUsersDataTable(),
+                ),
+              ),
             ),
           ),
         ],
