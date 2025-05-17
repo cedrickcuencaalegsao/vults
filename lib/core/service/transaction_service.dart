@@ -1,8 +1,7 @@
-// Create a new file: lib/services/transaction_service.dart
-
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Transaction;
 import 'package:vults/model/account_type.dart';
 import 'package:vults/model/transaction_model.dart';
+import 'package:vults/core/service/notification_service.dart';
 
 class TransactionService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -151,6 +150,9 @@ class TransactionService {
 
       // Commit all changes in one batch
       await batch.commit();
+      
+      // Send notifications after successful transaction
+      await _sendFirebaseNotification(senderDoc, recipientDoc, transactionRecord);
     } catch (e) {
       throw Exception(e.toString());
     }
@@ -172,5 +174,38 @@ class TransactionService {
         .collection('transactions')
         .orderBy('timestamp', descending: true)
         .snapshots();
+  }
+  
+  // Send Firebase notifications for transactions
+  Future<void> _sendFirebaseNotification(
+    DocumentSnapshot senderDoc,
+    DocumentSnapshot recipientDoc,
+    TransactionModel transactionModel,
+  ) async {
+    try {
+      
+      // Get sender and recipient names
+      final String senderName = '${senderDoc.get('firstName')} ${senderDoc.get('lastName')}';
+      final String recipientName = '${recipientDoc.get('firstName')} ${recipientDoc.get('lastName')}';
+      
+      // 1. Send notification to the sender (money sent)
+      await NotificationService.showTransactionNotification(
+        title: 'Money Sent',
+        body: 'You sent ${transactionModel.amount} to $recipientName',
+        payload: transactionModel.reference,
+      );
+      
+      // 2. Send notification to the recipient (money received)
+      await NotificationService.sendTransactionNotification(
+        receiverId: recipientDoc.id,
+        senderName: senderName,
+        amount: transactionModel.amount,
+        transactionId: transactionModel.reference,
+      );
+      
+    } catch (e) {
+      // We don't want to throw an exception here as the transaction was successful
+      // Just log the error and continue
+    }
   }
 }

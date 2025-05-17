@@ -8,6 +8,15 @@ import 'package:vults/model/transaction_model.dart'
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static String? _token;
+
+  static void setToken(String token) {
+    _token = token;
+  }
+
+  static String? getToken() {
+    return _token;
+  }
 
   // Register a new user with email and PIN
   Future<model.User> register({

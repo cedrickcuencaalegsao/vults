@@ -22,7 +22,7 @@ class NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       appBar: CustomAppBar(
         title: "Notifications",
         iconColor: ConstantString.darkBlue,

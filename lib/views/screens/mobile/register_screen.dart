@@ -8,6 +8,7 @@ import 'package:vults/views/widgets/mobile/registration_progress.dart';
 import 'package:vults/views/widgets/mobile/error.dart';
 import 'package:vults/views/widgets/mobile/success.dart';
 import 'package:vults/viewmodels/bloc/auth/auth_bloc.dart';
+import 'package:vults/views/widgets/mobile/policy.dart';
 
 class RegisterFirstScreen extends StatefulWidget {
   const RegisterFirstScreen({super.key});
@@ -139,8 +140,15 @@ class RegisterFirstScreenState extends State<RegisterFirstScreen> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            setState(() {
-                              _read = !_read; // Toggle the state
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const PolicyScreen(),
+                              ),
+                            ).then((_) {
+                              setState(() {
+                                _read = !_read; // Toggle the state
+                              });
                             });
                           },
                           child: Row(
@@ -271,6 +279,43 @@ class RegisterSecondScreenState extends State<RegisterSecondScreen> {
   final TextEditingController _pin = TextEditingController();
   final TextEditingController _confimPin = TextEditingController();
   bool _isLoading = false;
+
+  // Inside RegisterSecondScreenState class, add this method:
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: ConstantString.darkBlue,
+              onPrimary: ConstantString.white,
+              surface: ConstantString.white,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: ConstantString.darkBlue,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        // Format date as mm/dd/yyyy
+        _birthday.text =
+            "${picked.month.toString().padLeft(2, '0')}/"
+            "${picked.day.toString().padLeft(2, '0')}/"
+            "${picked.year.toString()}";
+      });
+    }
+  }
 
   void _navigate() async {
     if (_email.text.isEmpty) {
@@ -449,13 +494,15 @@ class RegisterSecondScreenState extends State<RegisterSecondScreen> {
                   hintText: ConstantString.birthday,
                   prefixIcon: Icons.calendar_month_rounded,
                   controller: _birthday,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    return null;
-                  },
+                  readOnly: true, // Make the input read-only
+                  onTap: () => _selectDate(context), // Show date picker on tap
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      Icons.calendar_today,
+                      color: ConstantString.darkBlue,
+                    ),
+                    onPressed: () => _selectDate(context),
+                  ),
                   width: MediaQuery.of(context).size.width * 0.8,
                 ),
                 SizedBox(height: screenHeight * 0.05),

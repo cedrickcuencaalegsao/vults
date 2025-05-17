@@ -9,6 +9,8 @@ import 'package:vults/viewmodels/bloc/settings/settings_bloc.dart';
 import 'package:vults/viewmodels/bloc/transaction/transaction_bloc.dart';
 import 'package:vults/viewmodels/bloc/account_settings/account_settings_bloc.dart';
 import 'package:vults/viewmodels/bloc/device/device_bloc.dart';
+import 'package:vults/viewmodels/bloc/notification/notification_bloc.dart';
+
 // Mobile Views.
 import 'package:vults/views/screens/mobile/register_screen.dart' as mobile;
 import 'package:vults/views/screens/mobile/sendmoney_screen.dart' as mobile;
@@ -38,8 +40,23 @@ import 'package:vults/views/screens/web/app.dart' as web;
 import 'package:firebase_core/firebase_core.dart';
 import './firebase_options.dart';
 
+// Services
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:vults/core/service/notification_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Try to load .env file if it exists, but continue if it doesn't
+  try {
+    await dotenv.load(fileName: ".env");
+    print("Environment variables loaded successfully");
+  } catch (e) {
+    print("No .env file found, continuing without environment variables");
+  }
+  
+  // Initialize notification service
+  await NotificationService.initialize();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(
     MultiBlocProvider(
@@ -49,6 +66,7 @@ void main() async {
         BlocProvider(create: (context) => AccountSettingsBloc()),
         BlocProvider(create: (context) => TransactionBloc()),
         BlocProvider(create: (context) => DeviceBloc()),
+        BlocProvider(create: (context) => NotificationBloc()),
       ],
       child: const MainApp(),
     ),
@@ -84,10 +102,15 @@ class MobileRoutes {
             create: (context) => TransactionBloc(),
             child: const mobile.TransactionScreen(),
           ),
+
       // '/transaction':
       //     (BuildContext context) => const mobile.TransactionScreen(),
-      '/notification':
-          (BuildContext context) => const mobile.NotificationScreen(),
+      '/notification':(BuildContext context) => BlocProvider(
+            create: (context) => NotificationBloc(),
+            child: const mobile.NotificationScreen(),
+          ),
+      // '/notification':
+      //     (BuildContext context) => const mobile.NotificationScreen(),
       '/settings':
           (BuildContext context) => BlocProvider.value(
             value: BlocProvider.of<SettingsBloc>(context),
